@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  /* blacks with a cold blue undertone (chroma 0.015–0.02 at hue 255) */
+  --color-bg: oklch(15% 0.015 255);
+  --color-surface: oklch(19% 0.018 255);
+  --color-surface-2: oklch(23% 0.02 255);
+  --color-border: oklch(30% 0.02 255);
+
+  /* cool whites, never pure #fff */
+  --color-ink: oklch(95% 0.005 255);
+  --color-muted: oklch(68% 0.025 255);
+
+  /* blue accent range */
+  --color-accent: oklch(72% 0.16 255);
+  --color-accent-bright: oklch(80% 0.13 255);
+  --color-accent-soft: oklch(32% 0.08 255);
+
+  /* fonts (wired via next/font in layout.tsx) */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Utility: default focus-visible ring in the accent color */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Enter reveal — the single shared animation. Driven by ui/Reveal.tsx, which
+   flips data-visible via IntersectionObserver. Transform + opacity only.
+   --------------------------------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Background layer — two slow-drifting accent blobs + fine noise.
+   Transform-only animation so it stays on the compositor. See ui/Background.tsx
+   --------------------------------------------------------------------------- */
+
+@keyframes drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(8vw, 6vh, 0) scale(1.18);
+  }
+}
+
+@keyframes drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(-7vw, -5vh, 0) scale(0.92);
+  }
+}
+
+.bg-blob {
+  background-image: radial-gradient(
+    circle closest-side,
+    var(--color-accent-soft),
+    transparent 100%
+  );
+  will-change: transform;
+}
+
+.bg-blob-a {
+  animation: drift-a 26s ease-in-out infinite;
+}
+
+.bg-blob-b {
+  animation: drift-b 34s ease-in-out infinite;
+}
+
+/* ~1kb inline SVG turbulence. Breaks up the gradients so wide, low-chroma
+   ramps don't band on 8-bit displays. */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.035;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob-a,
+  .bg-blob-b {
+    animation: none;
+  }
+}
