@@ -15,14 +15,13 @@ const screens = (slug: string) => ({
   mobile: `/screens/${slug}-mobile.webp`,
 });
 
-// TODO(Moheb): confirm role / stack / highlight lines — placeholders where not
-// specified in the brief are marked with (?).
+// Roles / stacks / highlights sourced from Moheb's CV (Webics Agency, 2026).
 export const projects: Project[] = [
   {
     slug: "webics",
     title: "Webics",
-    role: "Design & frontend development (?)",
-    stack: ["Next.js", "Tailwind CSS", "Motion"],
+    role: "Architecture & frontend",
+    stack: ["Next.js", "Tailwind CSS", "Motion", "Docker"],
     liveUrl: "https://webics.agency",
     embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("webics"),
@@ -31,8 +30,8 @@ export const projects: Project[] = [
   {
     slug: "seen",
     title: "Seen",
-    role: "Frontend development (?)",
-    stack: ["Next.js", "GSAP"],
+    role: "Frontend development",
+    stack: ["Next.js", "GSAP", "Motion"],
     liveUrl: "https://seencreatives.com",
     embeddable: true,
     screens: screens("seen"),
@@ -41,28 +40,28 @@ export const projects: Project[] = [
   {
     slug: "newbeat",
     title: "NewBeat",
-    role: "Frontend development (?)",
-    stack: ["Next.js", "Tailwind CSS"],
+    role: "Frontend development",
+    stack: ["Next.js", "Motion"],
     liveUrl: "https://newbeat.agency",
     embeddable: true,
     screens: screens("newbeat"),
-    highlight: "",
+    highlight: "Pixel-perfect creative portfolio",
   },
   {
     slug: "cairaw",
     title: "Cairaw",
-    role: "Frontend development (?)",
-    stack: ["Next.js", "Tailwind CSS"],
+    role: "Frontend development",
+    stack: ["Next.js", "Motion"],
     liveUrl: "https://cairawfilms.com",
     embeddable: true,
     screens: screens("cairaw"),
-    highlight: "",
+    highlight: "Pixel-perfect creative portfolio",
   },
   {
     slug: "capital-earth",
     title: "Capital Earth",
-    role: "Full-stack development (?)",
-    stack: ["Next.js", "Payload CMS", "PostgreSQL"],
+    role: "Full-stack development",
+    stack: ["Next.js", "Payload CMS", "PostgreSQL", "Docker"],
     liveUrl: "https://capitalearth-eg.com",
     embeddable: true,
     screens: screens("capital-earth"),
@@ -71,28 +70,28 @@ export const projects: Project[] = [
   {
     slug: "symk",
     title: "SYMK",
-    role: "Shopify development (?)",
+    role: "Shopify storefront development",
     stack: ["Shopify", "Liquid"],
     liveUrl: "https://scentsyoumayknow.com",
     embeddable: false, // Shopify: XFO: DENY + frame-ancestors 'none'
     screens: screens("symk"),
-    highlight: "",
+    highlight: "Custom Shopify Liquid storefront",
   },
   {
     slug: "lifescience",
     title: "LifeScience",
-    role: "Frontend development (?)",
-    stack: ["Next.js", "Tailwind CSS"],
+    role: "Full-stack developer (freelance)",
+    stack: ["Next.js", "Tailwind CSS", "Vercel"],
     liveUrl: "https://www.lifescience-eg.com",
     embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("lifescience"),
-    highlight: "",
+    highlight: "SSG + mobile-first, 40% faster load",
   },
   {
     slug: "ecosphere",
     title: "EcoSphere",
     role: "Personal project — full-stack",
-    stack: ["Next.js", "Stripe", "Zod"],
+    stack: ["Next.js", "MongoDB", "Stripe", "Zod"],
     liveUrl: "https://eco-sphere-kappa.vercel.app",
     embeddable: true,
     screens: screens("ecosphere"),

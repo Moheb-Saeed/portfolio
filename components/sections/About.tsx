@@ -10,18 +10,22 @@ export function About() {
         </h2>
       </Reveal>
 
-      {/* TODO(Moheb): replace with your own copy. */}
+      {/* Drafted from Moheb's CV — edit freely. */}
       <Reveal className="mt-8 max-w-2xl space-y-4 text-lg leading-relaxed text-muted">
         <p>
-          I&apos;m a frontend and full-stack engineer based in Cairo, working
-          mostly with Next.js and Node.js. I care about interfaces that are fast,
-          accessible, and precise — the kind where the performance budget is part
-          of the design, not an afterthought.
+          I&apos;m a software engineer based in Cairo with a B.E. in Computer
+          Engineering, specializing in full-stack web architecture with Next.js
+          and Node.js. I care about interfaces that are fast, accessible, and
+          precise — the kind where the performance budget is part of the design,
+          not an afterthought.
         </p>
         <p>
-          Recently I&apos;ve been building bilingual (AR/EN) marketing sites and
-          commerce experiences, taking them from design through to CMS
-          integration and deployment.
+          At Webics Agency I&apos;ve architected performance-focused marketing
+          sites and creative portfolios, a bilingual (AR/EN) property platform on
+          Payload CMS and PostgreSQL, and an AI-assisted grading system —
+          consistently pushing Lighthouse scores to 100 and animations to a fluid
+          60fps, with containerized Docker deployments and robust REST/GraphQL
+          APIs behind them.
         </p>
       </Reveal>
     </section>
