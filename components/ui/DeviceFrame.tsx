@@ -23,8 +23,8 @@ const FRAMES: Record<Device, FrameSpec> = {
     src: "/frames/macbook.png",
     width: 1396,
     height: 850,
-    hole: { top: 2.45, left: 9.31, width: 81.38, height: 86.24 },
-    content: { top: 2.45, left: 9.31, width: 81.38, height: 86.24 },
+    hole: { top: 2.45, left: 9.12, width: 81.75, height: 86.24 },
+    content: { top: 2.45, left: 9.12, width: 81.75, height: 86.24 },
     sizes: "(min-width: 1152px) 700px, 78vw",
   },
   ipad: {
@@ -40,7 +40,9 @@ const FRAMES: Record<Device, FrameSpec> = {
     width: 902,
     height: 1862,
     hole: { top: 1.61, left: 4.21, width: 91.8, height: 96.67 },
-    content: { top: 7.09, left: 4.21, width: 91.8, height: 91.19 },
+    // Fill the full screen so the frame dimensions match and the notch/status
+    // area shows the site's own background instead of a mismatched dark strip.
+    content: { top: 1.61, left: 4.21, width: 91.8, height: 96.67 },
     sizes: "(min-width: 1152px) 120px, 20vw",
   },
 };
