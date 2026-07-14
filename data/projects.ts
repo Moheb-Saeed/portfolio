@@ -7,6 +7,7 @@ export type Project = {
   embeddable: boolean; // verified 2026-07-09 via X-Frame-Options / CSP frame-ancestors headers
   screens: { desktop: string; tablet: string; mobile: string }; // screenshot fallbacks
   highlight: string; // one-line metric; empty = not shown
+  screenBg: string; // site's top background color — fills the iPhone status strip above the notch
 };
 
 const screens = (slug: string) => ({
@@ -26,6 +27,7 @@ export const projects: Project[] = [
     embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("webics"),
     highlight: "Lighthouse 71 → 100",
+    screenBg: "#030919",
   },
   {
     slug: "seen",
@@ -36,6 +38,7 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("seen"),
     highlight: "60fps GSAP animations",
+    screenBg: "#000000",
   },
   {
     slug: "newbeat",
@@ -46,6 +49,7 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("newbeat"),
     highlight: "Pixel-perfect creative portfolio",
+    screenBg: "#000000",
   },
   {
     slug: "cairaw",
@@ -56,6 +60,7 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("cairaw"),
     highlight: "Pixel-perfect creative portfolio",
+    screenBg: "#000000",
   },
   {
     slug: "capital-earth",
@@ -66,6 +71,7 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("capital-earth"),
     highlight: "Bilingual AR/EN, Payload CMS + PostgreSQL",
+    screenBg: "#fefffb",
   },
   {
     slug: "symk",
@@ -76,6 +82,7 @@ export const projects: Project[] = [
     embeddable: false, // Shopify: XFO: DENY + frame-ancestors 'none'
     screens: screens("symk"),
     highlight: "Custom Shopify Liquid storefront",
+    screenBg: "#a29599",
   },
   {
     slug: "lifescience",
@@ -86,6 +93,7 @@ export const projects: Project[] = [
     embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("lifescience"),
     highlight: "SSG + mobile-first, 40% faster load",
+    screenBg: "#dae0e4",
   },
   {
     slug: "ecosphere",
@@ -96,5 +104,6 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("ecosphere"),
     highlight: "Stripe webhooks, Zod validation",
+    screenBg: "#ffffff",
   },
 ];

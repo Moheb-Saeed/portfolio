@@ -40,9 +40,9 @@ const FRAMES: Record<Device, FrameSpec> = {
     width: 902,
     height: 1862,
     hole: { top: 1.61, left: 4.21, width: 91.8, height: 96.67 },
-    // Fill the full screen so the frame dimensions match and the notch/status
-    // area shows the site's own background instead of a mismatched dark strip.
-    content: { top: 1.61, left: 4.21, width: 91.8, height: 96.67 },
+    // Content sits below the notch (+~2.5% clearance) so the site header clears
+    // the Dynamic Island; the strip above is filled with the site's own bg color.
+    content: { top: 9.6, left: 4.21, width: 91.8, height: 88.68 },
     sizes: "(min-width: 1152px) 120px, 20vw",
   },
 };
@@ -57,6 +57,8 @@ const rectStyle = (r: Rect) => ({
 type DeviceFrameProps = {
   device: Device;
   children: ReactNode;
+  /** Fills the iPhone status strip above the notch so it matches the site. */
+  screenBg?: string;
 };
 
 /**
@@ -65,14 +67,17 @@ type DeviceFrameProps = {
  * iPhone); the transparent frame PNG is overlaid on top (decorative,
  * click-through) so its bezel masks the screen's corners.
  */
-export function DeviceFrame({ device, children }: DeviceFrameProps) {
+export function DeviceFrame({ device, children, screenBg }: DeviceFrameProps) {
   const f = FRAMES[device];
   return (
     <div
       className="relative w-full select-none"
       style={{ aspectRatio: `${f.width} / ${f.height}` }}
     >
-      <div className="absolute bg-bg" style={rectStyle(f.hole)} />
+      <div
+        className="absolute"
+        style={{ ...rectStyle(f.hole), backgroundColor: screenBg ?? "var(--color-bg)" }}
+      />
       <div className="absolute overflow-hidden" style={rectStyle(f.content)}>
         {children}
       </div>

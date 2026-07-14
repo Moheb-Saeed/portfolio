@@ -25,7 +25,7 @@ function Showcase({
   return (
     // Hover micro-interaction: CSS transition only, never Motion.
     <div className="transition-transform duration-300 ease-out hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
-      <DeviceFrame device={device}>
+      <DeviceFrame device={device} screenBg={device === "iphone" ? project.screenBg : undefined}>
         <DeviceScreen
           device={device}
           title={project.title}
