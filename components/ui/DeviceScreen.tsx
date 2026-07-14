@@ -4,10 +4,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { Device } from "./DeviceFrame";
 
+// Heights set so each viewport's aspect matches the frame's measured screen
+// cutout, so a width-scaled iframe fills the well with no letterboxing.
 const VIEWPORTS: Record<Device, { width: number; height: number }> = {
-  macbook: { width: 1440, height: 900 },
-  ipad: { width: 820, height: 1180 },
-  iphone: { width: 390, height: 844 },
+  macbook: { width: 1440, height: 929 },
+  ipad: { width: 820, height: 1174 },
+  iphone: { width: 390, height: 848 },
 };
 
 const IMAGE_SIZES: Record<Device, string> = {
@@ -74,8 +76,7 @@ export function DeviceScreen({
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden bg-surface-2"
-      style={{ aspectRatio: `${width} / ${height}` }}
+      className="relative h-full w-full overflow-hidden bg-bg"
     >
       {embeddable ? (
         showIframe &&
