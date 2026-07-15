@@ -20,11 +20,11 @@ type FrameSpec = {
 // content is inset below the measured 5.67%-deep notch so the site header clears it.
 const FRAMES: Record<Device, FrameSpec> = {
   macbook: {
-    src: "/frames/macbook.png",
-    width: 1396,
-    height: 850,
-    hole: { top: 2.45, left: 9.12, width: 81.75, height: 86.24 },
-    content: { top: 2.45, left: 9.12, width: 81.75, height: 86.24 },
+    src: "/frames/macbook-frame.png",
+    width: 1391,
+    height: 848,
+    hole: { top: 1.84, left: 8.97, width: 82.06, height: 87.12 },
+    content: { top: 1.84, left: 8.97, width: 82.06, height: 87.12 },
     sizes: "(min-width: 1152px) 700px, 78vw",
   },
   ipad: {

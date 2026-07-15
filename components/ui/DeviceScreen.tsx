@@ -7,7 +7,7 @@ import type { Device } from "./DeviceFrame";
 // Heights set so each viewport's aspect matches the frame's measured screen
 // cutout, so a width-scaled iframe fills the well with no letterboxing.
 const VIEWPORTS: Record<Device, { width: number; height: number }> = {
-  macbook: { width: 1440, height: 929 },
+  macbook: { width: 1440, height: 932 },
   ipad: { width: 820, height: 1174 },
   iphone: { width: 390, height: 848 },
 };
