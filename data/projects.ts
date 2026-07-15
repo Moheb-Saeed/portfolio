@@ -7,7 +7,11 @@ export type Project = {
   embeddable: boolean; // verified 2026-07-09 via X-Frame-Options / CSP frame-ancestors headers
   screens: { desktop: string; tablet: string; mobile: string }; // screenshot fallbacks
   highlight: string; // one-line metric; empty = not shown
-  screenBg: string; // site's top background color — fills the iPhone status strip above the notch
+  // Fills the iPhone status strip above the notch so it reads seamlessly with
+  // the screen. Sampled from the content as actually rendered inside the frame
+  // — not from the live site loaded standalone, which can differ (EcoSphere
+  // renders light on its own but dark in the embed).
+  screenBg: string;
 };
 
 const screens = (slug: string) => ({
@@ -38,7 +42,7 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("seen"),
     highlight: "60fps GSAP animations",
-    screenBg: "#000000",
+    screenBg: "#070707",
   },
   {
     slug: "newbeat",
@@ -82,7 +86,7 @@ export const projects: Project[] = [
     embeddable: false, // Shopify: XFO: DENY + frame-ancestors 'none'
     screens: screens("symk"),
     highlight: "Custom Shopify Liquid storefront",
-    screenBg: "#a29599",
+    screenBg: "#9d9394",
   },
   {
     slug: "lifescience",
@@ -93,7 +97,7 @@ export const projects: Project[] = [
     embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("lifescience"),
     highlight: "SSG + mobile-first, 40% faster load",
-    screenBg: "#dae0e4",
+    screenBg: "#dbe1e4",
   },
   {
     slug: "ecosphere",
@@ -104,6 +108,6 @@ export const projects: Project[] = [
     embeddable: true,
     screens: screens("ecosphere"),
     highlight: "Stripe webhooks, Zod validation",
-    screenBg: "#ffffff",
+    screenBg: "#0a0909",
   },
 ];
