@@ -25,7 +25,9 @@ function Showcase({
   return (
     // Hover micro-interaction: CSS transition only, never Motion.
     <div className="transition-transform duration-300 ease-out hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
-      <DeviceFrame device={device} screenBg={device === "iphone" ? project.screenBg : undefined}>
+      {/* screenBg fills the strip above the notch on the MacBook and iPhone.
+          The iPad has no notch, so its content covers the backing entirely. */}
+      <DeviceFrame device={device} screenBg={project.screenBg}>
         <DeviceScreen
           device={device}
           title={project.title}

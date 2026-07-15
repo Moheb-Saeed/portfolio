@@ -27,7 +27,10 @@ const FRAMES: Record<Device, FrameSpec> = {
     width: 1391,
     height: 848,
     hole: { top: 1.84, left: 8.97, width: 82.06, height: 87.12 },
-    content: { top: 1.84, left: 8.97, width: 82.06, height: 87.12 },
+    // Content sits below the camera notch (which reaches 4.36% and spans 40% of
+    // the width, so it clashes with centred site logos); the strip above is
+    // filled with the site's own bg colour, reading like the macOS menu bar.
+    content: { top: 6.0, left: 8.97, width: 82.06, height: 82.96 },
     screenRadius: 0.008, // MacBook display corners are nearly square
     sizes: "(min-width: 1152px) 700px, 78vw",
   },
