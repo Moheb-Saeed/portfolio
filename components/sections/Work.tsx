@@ -18,7 +18,9 @@ export function Work() {
           accepts the prop for future above-the-fold case-study pages. */}
       <div className="mt-16 space-y-24">
         {CATEGORY_ORDER.map((category) => {
-          const grouped = projects.filter((p) => p.category === category);
+          const grouped = projects.filter(
+            (p) => p.category === category && !p.draft
+          );
           if (grouped.length === 0) return null;
 
           return (

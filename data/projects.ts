@@ -18,6 +18,7 @@ export type Project = {
   embeddable: boolean; // verified 2026-07-09 via X-Frame-Options / CSP frame-ancestors headers
   screens: { desktop: string; tablet: string; mobile: string }; // screenshot fallbacks
   description: string; // what it is / the nature of the business; shown under the card
+  draft?: boolean; // true = hidden from the site until the project goes live
   // Fills the iPhone status strip above the notch so it reads seamlessly with
   // the screen. Sampled from the content as actually rendered inside the frame
   // — not from the live site loaded standalone, which can differ (EcoSphere
@@ -98,6 +99,7 @@ export const projects: Project[] = [
     description:
       "A full-service media production house crafting brand stories through cinematography, video, photography, and audio.",
     screenBg: "#000000",
+    draft: true, // TODO(Moheb): remove once cairawfilms.com is live
   },
   {
     slug: "symk",
@@ -129,7 +131,7 @@ export const projects: Project[] = [
     slug: "ecosphere",
     title: "EcoSphere",
     category: "Projects",
-    role: "Personal project — full-stack",
+    role: "Personal project — frontend",
     stack: ["Next.js", "MongoDB", "Stripe", "Zod"],
     liveUrl: "https://eco-sphere-kappa.vercel.app",
     embeddable: true,
