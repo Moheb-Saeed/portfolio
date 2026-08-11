@@ -39,12 +39,15 @@ export async function submitContact(
     return { status: "success" }; // silently pretend it worked
   }
 
-  // Anti-spam 2: minimum fill time. The timestamp is stamped on mount, so a
-  // missing/zero value means the form was posted without running our client
-  // code — reject rather than let it through (Number("") === 0 is finite).
+  // Anti-spam 2: minimum fill time. The timestamp is stamped on mount using the
+  // browser's clock, so it's only trustworthy when it's present and roughly
+  // agrees with ours. Reject only a real, positive, sub-threshold gap. A missing
+  // stamp (no-JS / pre-hydration) or a client clock that runs ahead of the
+  // server (negative gap) would otherwise block real people, so those fall
+  // through to the honeypot + rate limiter instead.
   const startedAt = Number(formData.get("startedAt"));
   const elapsed = Date.now() - startedAt;
-  if (!Number.isFinite(startedAt) || startedAt <= 0 || elapsed < MIN_FILL_MS) {
+  if (startedAt > 0 && elapsed >= 0 && elapsed < MIN_FILL_MS) {
     return {
       status: "error",
       message: "That was too quick — please try again.",
