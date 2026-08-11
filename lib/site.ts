@@ -7,7 +7,7 @@ export const site = {
   location: "Cairo, Egypt",
   email: "moheb.saed55@gmail.com",
   github: "https://github.com/Moheb-Saeed",
-  linkedin: "https://linkedin.com/in/moheb-saeed-43a2a0265",
+  linkedin: "https://www.linkedin.com/in/moheb-saeed/",
   whatsapp:
     "https://wa.me/201005547821?text=Hi%20Moheb%2C%20I%20saw%20your%20portfolio",
   cv: "/Moheb-Saeed_CV.pdf",
