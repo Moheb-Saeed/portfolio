@@ -24,7 +24,7 @@ export function MSLogo({ size = 36, className, title = "Moheb Saeed" }: MSLogoPr
         width="92"
         height="92"
         rx="24"
-        fill="oklch(72% 0.16 255)"
+        fill="oklch(33% 0.12 255)"
       />
       <text
         x="50"
@@ -35,7 +35,7 @@ export function MSLogo({ size = 36, className, title = "Moheb Saeed" }: MSLogoPr
         fontWeight="700"
         fontSize="46"
         letterSpacing="-2"
-        fill="oklch(15% 0.015 255)"
+        fill="#ffffff"
       >
         MS
       </text>

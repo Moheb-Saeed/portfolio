@@ -24,8 +24,8 @@ export function Hero() {
 
       {/* TODO(Moheb): final positioning line. */}
       <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-        Frontend engineer specializing in Next.js — pixel-perfect, fast,
-        bilingual-ready.
+        Software engineer specializing in Next.js & React.js — pixel-perfect,
+        fast, bilingual-ready.
       </p>
 
       <div className="mt-10 flex flex-wrap gap-3">

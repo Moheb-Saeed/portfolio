@@ -12,8 +12,8 @@
   --color-muted: oklch(68% 0.025 255);
 
   /* blue accent range */
-  --color-accent: oklch(72% 0.16 255);
-  --color-accent-bright: oklch(80% 0.13 255);
+  --color-accent: oklch(62% 0.18 255); /* button bg, echoes the logo blue (hue 255); 5.3:1 with dark label */
+  --color-accent-bright: oklch(66% 0.17 255); /* eyebrow text + button hover (brighter); ~6.3:1 on bg */
   --color-accent-soft: oklch(32% 0.08 255);
 
   /* fonts (wired via next/font in layout.tsx) */
@@ -28,6 +28,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Contains the device layers that start off the screen edges (see
+     `.device-slide`) so they never add a horizontal scrollbar. `clip` — not
+     `hidden` — so it doesn't turn the root into a scroll container and break
+     the sticky nav. */
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -42,6 +47,10 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Clip here too, not just on <html>: an off-screen layer's overflow otherwise
+     propagates through the body box and still scrolls the page sideways. `clip`
+     keeps the sticky nav working (it creates no scroll container). */
+  overflow-x: clip;
 }
 
 /* Utility: default focus-visible ring in the accent color */
@@ -75,6 +84,71 @@ body {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Work section device slide-in. Each ProjectCard's layers start off a screen
+   edge and ease to their resting position when the cluster scrolls into view —
+   the MacBook from the left, the iPad + iPhone from the right. Driven by
+   ui/ClusterReveal.tsx, which flips data-visible via IntersectionObserver.
+   Transform only, so it stays on the compositor.
+   --------------------------------------------------------------------------- */
+
+@keyframes device-in-left {
+  from {
+    transform: translateX(-100vw);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes device-in-right {
+  from {
+    transform: translateX(100vw);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Rest off the matching screen edge until the cluster scrolls into view. */
+.device-from-left {
+  transform: translateX(-100vw);
+}
+
+.device-from-right {
+  transform: translateX(100vw);
+}
+
+/* A keyframe animation (not a transition) so it's driven by the compositor and
+   starts on time even while the device screenshots are still decoding on the
+   main thread. Transform only — no layout, no paint. */
+[data-device-cluster][data-visible="true"] .device-from-left {
+  animation: device-in-left 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+[data-device-cluster][data-visible="true"] .device-from-right {
+  animation: device-in-right 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gentle cascade: the iPad, then the iPhone, trail the MacBook in. */
+[data-device-cluster][data-visible="true"] .device-delay-1 {
+  animation-delay: 0.07s;
+}
+
+[data-device-cluster][data-visible="true"] .device-delay-2 {
+  animation-delay: 0.14s;
+}
+
+/* Plays regardless of prefers-reduced-motion (intentional — the slide is core
+   to the Work section). No-JS path (data-visible never set): rest at final spot
+   so the devices are never stranded off-screen. */
+@media (scripting: none) {
+  .device-from-left,
+  .device-from-right {
+    transform: none;
   }
 }
 

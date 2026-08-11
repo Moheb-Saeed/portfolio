@@ -1,4 +1,4 @@
-import { projects } from "@/data/projects";
+import { projects, CATEGORY_ORDER } from "@/data/projects";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -16,12 +16,29 @@ export function Work() {
           first screenshot is in the initial viewport. Preloading one would only
           compete with the fonts and the hero's LCP paint. ProjectCard still
           accepts the prop for future above-the-fold case-study pages. */}
-      <div className="mt-16 space-y-28">
-        {projects.map((project) => (
-          <Reveal key={project.slug}>
-            <ProjectCard project={project} />
-          </Reveal>
-        ))}
+      <div className="mt-16 space-y-24">
+        {CATEGORY_ORDER.map((category) => {
+          const grouped = projects.filter((p) => p.category === category);
+          if (grouped.length === 0) return null;
+
+          return (
+            <div key={category}>
+              <Reveal>
+                <h3 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+                  {category}
+                </h3>
+              </Reveal>
+
+              <div className="mt-12 space-y-28">
+                {grouped.map((project) => (
+                  <Reveal key={project.slug}>
+                    <ProjectCard project={project} titleAs="h4" />
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

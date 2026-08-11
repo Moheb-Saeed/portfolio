@@ -11,7 +11,7 @@ const SURFACE = "#22262f";
 const BORDER = "#3a4150";
 const INK = "#eef0f4";
 const MUTED = "#9aa3b5";
-const ACCENT = "#4b9bff";
+const LOGO = "#003371"; // oklch(33% 0.12 255) — deep-blue logo chip
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -38,8 +38,8 @@ export default function OpengraphImage() {
               width: 96,
               height: 96,
               borderRadius: 24,
-              background: ACCENT,
-              color: BG,
+              background: LOGO,
+              color: "#ffffff",
               fontSize: 46,
               fontWeight: 700,
               letterSpacing: -2,
@@ -65,7 +65,7 @@ export default function OpengraphImage() {
             {site.name}
           </div>
           <div style={{ display: "flex", marginTop: 16, fontSize: 34, color: MUTED }}>
-            Frontend engineer specializing in Next.js
+            Software engineer specializing in Next.js & React.js
           </div>
         </div>
 

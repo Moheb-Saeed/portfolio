@@ -28,15 +28,19 @@ const geistMono = Geist_Mono({
 });
 
 const description =
-  "Frontend & full-stack engineer specializing in Next.js — pixel-perfect, fast, bilingual-ready. Based in Cairo.";
+  "Moheb Saeed is a software engineer in Cairo specializing in Next.js, React.js & Node.js — building fast, accessible, bilingual full-stack web apps.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — ${site.role}`,
+    // Homepage keeps the role plus the two headline technologies for search;
+    // the template covers any future sub-pages.
+    default: `${site.name} — ${site.role} | Next.js & React.js`,
     template: `%s — ${site.name}`,
   },
   description,
+  authors: [{ name: site.name, url: site.url }],
+  creator: site.name,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
@@ -65,14 +69,30 @@ const personJsonLd = {
   name: site.name,
   url: site.url,
   jobTitle: site.role,
+  description,
   email: `mailto:${site.email}`,
+  worksFor: { "@type": "Organization", name: "Webics Agency" },
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Modern Academy for Engineering and Technology",
+  },
   address: {
     "@type": "PostalAddress",
     addressLocality: "Cairo",
     addressCountry: "EG",
   },
   sameAs: [site.github, site.linkedin],
-  knowsAbout: ["Next.js", "React", "TypeScript", "Node.js", "Tailwind CSS"],
+  knowsAbout: [
+    "Next.js",
+    "React.js",
+    "TypeScript",
+    "Node.js",
+    "Tailwind CSS",
+    "Full-stack web development",
+    "GraphQL",
+    "PostgreSQL",
+    "Docker",
+  ],
 };
 
 export default function RootLayout({

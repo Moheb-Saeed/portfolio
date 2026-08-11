@@ -76,7 +76,9 @@ export function DeviceScreen({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-bg"
+      // Transparent so the frame's screenBg backing shows through while an
+      // iframe loads — the screen reads as the site's own colour, not dark.
+      className="relative h-full w-full overflow-hidden"
     >
       {embeddable ? (
         showIframe &&
@@ -96,10 +98,13 @@ export function DeviceScreen({
       ) : (
         <Image
           src={screenshot}
-          alt=""
+          // Describe the primary (desktop) shot for image search; the tablet and
+          // phone are duplicate views of the same site, so they stay decorative.
+          alt={device === "macbook" ? `${title} — desktop website preview` : ""}
           fill
           sizes={IMAGE_SIZES[device]}
           priority={priority}
+          quality={65}
           className="object-cover object-top"
         />
       )}

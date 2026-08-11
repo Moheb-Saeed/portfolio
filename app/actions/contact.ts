@@ -1,41 +1,34 @@
 "use server";
 
+import { headers } from "next/headers";
 import { z } from "zod";
 import { Resend } from "resend";
 import { site } from "@/lib/site";
+import { rateLimit } from "@/lib/rate-limit";
+import { contactSchema, escapeHtml } from "@/lib/contact";
 
 /** A real human takes at least this long to fill the form. */
 const MIN_FILL_MS = 3000;
 
-const schema = z.object({
-  name: z.string().trim().min(2, "Please enter your name.").max(100),
-  email: z.email("Please enter a valid email address.").max(200),
-  message: z
-    .string()
-    .trim()
-    .min(10, "Please write at least 10 characters.")
-    .max(5000, "Message is too long."),
-});
+/** At most this many messages may be sent from one IP per window. */
+const MAX_PER_WINDOW = 5;
+const RATE_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
+/** Best-effort client IP from the platform's proxy headers. */
+async function clientIp() {
+  const h = await headers();
+  return (
+    h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    h.get("x-real-ip") ||
+    "unknown"
+  );
+}
 
 export type ContactState = {
   status: "idle" | "success" | "error";
   message?: string;
   fieldErrors?: Partial<Record<"name" | "email" | "message", string>>;
 };
-
-function escapeHtml(value: string) {
-  return value.replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c]!
-  );
-}
 
 export async function submitContact(
   _prev: ContactState,
@@ -58,7 +51,7 @@ export async function submitContact(
     };
   }
 
-  const parsed = schema.safeParse({
+  const parsed = contactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
     message: formData.get("message"),
@@ -88,6 +81,21 @@ export async function submitContact(
 
   const { name, email, message } = parsed.data;
 
+  // Rate limit actual send attempts per IP — validation-error retries above
+  // don't count, so a legitimate visitor fixing a field is never blocked.
+  const limit = await rateLimit(
+    `contact:${await clientIp()}`,
+    MAX_PER_WINDOW,
+    RATE_WINDOW_MS
+  );
+  if (!limit.ok) {
+    const minutes = Math.max(1, Math.ceil(limit.retryAfterMs / 60_000));
+    return {
+      status: "error",
+      message: `Too many messages. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+    };
+  }
+
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
@@ -95,7 +103,8 @@ export async function submitContact(
       from: "Portfolio <onboarding@resend.dev>",
       to: [site.email],
       replyTo: email,
-      subject: `Portfolio enquiry from ${name}`,
+      // Collapse any newlines so the name can't spill onto its own header line.
+      subject: `Portfolio enquiry from ${name.replace(/[\r\n]+/g, " ")}`,
       text: `From: ${name} <${email}>\n\n${message}`,
       html: `<p><strong>From:</strong> ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;</p><p style="white-space:pre-wrap">${escapeHtml(message)}</p>`,
     });

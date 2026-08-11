@@ -3,7 +3,7 @@ export const site = {
   // It drives canonical URLs, OG image URLs, sitemap, and JSON-LD.
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://moheb-saeed.vercel.app",
   name: "Moheb Saeed",
-  role: "Frontend Engineer",
+  role: "Software Engineer",
   location: "Cairo, Egypt",
   email: "moheb.saed55@gmail.com",
   github: "https://github.com/Moheb-Saeed",
