@@ -1,30 +1,182 @@
 @import "tailwindcss";
 
-@theme {
-  /* blacks with a cold blue undertone (chroma 0.015–0.02 at hue 255) */
-  --color-bg: oklch(15% 0.015 255);
-  --color-surface: oklch(19% 0.018 255);
-  --color-surface-2: oklch(23% 0.02 255);
-  --color-border: oklch(30% 0.02 255);
+/* ===========================================================================
+   MS Brand Manual v1.0 — design tokens.
 
-  /* cool whites, never pure #fff */
-  --color-ink: oklch(95% 0.005 255);
-  --color-muted: oklch(68% 0.025 255);
+   Everything below is lifted from the manual rather than tuned by eye. The
+   palette, the type scale, the 4px spacing scale, the four radii and the single
+   elevation level are all fixed values from it; if a number here looks
+   arbitrary, it came from a page of the PDF, not from taste.
+   =========================================================================== */
 
-  /* blue accent range */
-  --color-accent: oklch(62% 0.18 255); /* button bg, echoes the logo blue (hue 255); 5.3:1 with dark label */
-  --color-accent-bright: oklch(66% 0.17 255); /* eyebrow text + button hover (brighter); ~6.3:1 on bg */
-  --color-accent-soft: oklch(32% 0.08 255);
+/* ---------------------------------------------------------------------------
+   10 · Colour palette — the raw scales. Fixed sRGB, never referenced directly
+   by a component; the semantic tokens below map them onto roles.
+   --------------------------------------------------------------------------- */
 
-  /* fonts (wired via next/font in layout.tsx) */
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+:root {
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb; /* Signal Blue — the only accent in the system */
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a8a;
+
+  --neutral-00: #ffffff; /* Paper */
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-800: #1e293b;
+  --neutral-950: #0a1628; /* Deep Ink — blue-cast, never pure black */
 }
+
+/* ---------------------------------------------------------------------------
+   Semantic tokens. Dark is this site's default ground; the manual's light-mode
+   configuration takes over under `prefers-color-scheme: light`.
+
+   Two separate blue roles, because the manual is explicit that they are not
+   interchangeable: "Blue 600 on white passes; Blue 400 does not — it is
+   dark-mode only." So `accent` (text, links, hairline accents) flips per mode,
+   while `accent-solid` (filled buttons) stays Signal Blue in both, which is the
+   only value that carries a white label at 5.2:1.
+   --------------------------------------------------------------------------- */
 
 :root {
   color-scheme: dark;
+
+  --ms-surface: var(--neutral-950); /* Surface 950 */
+  --ms-raised: var(--neutral-800); /* Raised 800 */
+  --ms-line: var(--neutral-800); /* Line #1E293B */
+  --ms-ink: var(--neutral-00); /* Text 00 */
+  --ms-muted: var(--neutral-400); /* Text 400 — 7.0:1 on Ink */
+  --ms-accent: var(--blue-400); /* Accent 400 — 7.1:1 on Ink */
+  --ms-accent-solid: var(--blue-600);
+  /* Hover for a filled control. Blue 700 is the gradient's own start colour and
+     still carries a white label at 6.7:1; going lighter would not. */
+  --ms-accent-strong: var(--blue-700);
+  --ms-on-accent: var(--neutral-00);
+  --ms-accent-quiet: color-mix(in oklab, var(--blue-400) 14%, transparent);
+  --ms-danger: #fca5a5; /* status colour — product UI only, per §10 */
+
+  /* "No shadows — separate with lines and raised surfaces." (§14, dark mode) */
+  --ms-elevation: none;
+
+  /* Signature gradient. 180° is the manual's angle for a *vertical* rule; these
+     rules run horizontally, so the ramp turns with them. */
+  --ms-rule: linear-gradient(90deg, var(--blue-700) 0%, var(--blue-400) 100%);
+
+  /* Texture strength, tuned by the manual's own test: "if you can read the
+     pattern before the content, it is too strong".
+     This sits under the quoted 4–8% band, and deliberately so — that band
+     assumes ink on paper, where the lattice is a printed hairline. On a backlit
+     display the same alpha reads considerably hotter, and the lattice is thin
+     high-frequency stroke work, which the eye picks out far more readily than a
+     flat tint. Measured on screen, 4% still reads as wallpaper in both themes.
+     One value covers both: at this level the light and dark renderings land in
+     the same perceptual place. */
+  --ms-texture: 0.022;
 }
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --ms-surface: var(--neutral-00); /* Surface 00 */
+    --ms-raised: var(--neutral-50); /* Raised 50 */
+    --ms-line: var(--neutral-200); /* Line 200 */
+    --ms-ink: var(--neutral-950); /* Text 950 */
+    --ms-muted: var(--neutral-600); /* Text 600 — 7.6:1 on Paper */
+    --ms-accent: var(--blue-600); /* Accent 600 — 5.2:1 on Paper */
+    --ms-accent-quiet: color-mix(in oklab, var(--blue-600) 10%, transparent);
+    --ms-danger: #b42318;
+
+    /* §11 — one soft shadow. There is no second level. */
+    --ms-elevation: 0 6px 18px -8px rgb(10 22 40 / 0.28);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Tailwind theme. `inline` so utilities emit the runtime var directly and the
+   whole palette flips with the media query above — no `dark:` variant needed
+   on a single component.
+   --------------------------------------------------------------------------- */
+
+@theme inline {
+  --color-surface: var(--ms-surface);
+  --color-raised: var(--ms-raised);
+  --color-line: var(--ms-line);
+  --color-ink: var(--ms-ink);
+  --color-muted: var(--ms-muted);
+  --color-accent: var(--ms-accent);
+  --color-accent-solid: var(--ms-accent-solid);
+  --color-accent-strong: var(--ms-accent-strong);
+  --color-on-accent: var(--ms-on-accent);
+  --color-accent-quiet: var(--ms-accent-quiet);
+  --color-danger: var(--ms-danger);
+
+  /* 08 · Typography — Space Grotesk display, Archivo text, JetBrains Mono
+     detail. Wired via next/font in layout.tsx. */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Type scale. Sizes are the manual's desktop values; the fluid floor keeps
+     them readable at 375px without inventing steps off the scale. */
+  --text-display: clamp(2rem, 1.15rem + 4.2vw, 3.5rem); /* 56 / 1.05 / 700 */
+  --text-display--line-height: 1.05;
+  --text-display--font-weight: 700;
+  --text-display--letter-spacing: -0.02em;
+
+  --text-h1: clamp(1.75rem, 1.2rem + 2.7vw, 2.5rem); /* 40 / 1.15 / 800 */
+  --text-h1--line-height: 1.15;
+  /* Reserved for sub-pages: the homepage h1 is the display mark, so nothing
+     uses this yet. Archivo ExtraBold is loaded, so it won't be synthesised. */
+  --text-h1--font-weight: 800;
+  --text-h1--letter-spacing: -0.02em;
+
+  --text-h2: clamp(1.5rem, 1.28rem + 1.1vw, 1.75rem); /* 28 / 1.25 / 700 */
+  --text-h2--line-height: 1.25;
+  --text-h2--font-weight: 700;
+  --text-h2--letter-spacing: -0.01em;
+
+  --text-h3: 1.25rem; /* 20 / 1.35 / 600 */
+  --text-h3--line-height: 1.35;
+  --text-h3--font-weight: 600;
+  --text-h3--letter-spacing: -0.01em;
+
+  --text-body: 1rem; /* 16 / 1.65 / 400 */
+  --text-body--line-height: 1.65;
+
+  --text-small: 0.875rem; /* 14 / 1.6 / 400 */
+  --text-small--line-height: 1.6;
+
+  --text-eyebrow: 0.75rem; /* 12 / 1.4 / 500 */
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--font-weight: 500;
+  --text-eyebrow--letter-spacing: 0.14em;
+
+  /* 11 · Grid & radii — four values, no others. */
+  --radius-input: 6px;
+  --radius-card: 10px;
+  --radius-panel: 18px;
+
+  --shadow-raised: var(--ms-elevation);
+
+  /* 12 columns, 24px gutter, 1280px max content width. */
+  --container-page: 80rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
 
 html {
   scroll-behavior: smooth;
@@ -42,9 +194,14 @@ html {
 }
 
 body {
-  background-color: var(--color-bg);
+  /* Anchors the cover texture (ui/Background.tsx) to the top of the page rather
+     than the viewport, so it scrolls away with the hero. */
+  position: relative;
+  background-color: var(--color-surface);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   /* Clip here too, not just on <html>: an off-screen layer's overflow otherwise
@@ -53,12 +210,245 @@ body {
   overflow-x: clip;
 }
 
-/* Utility: default focus-visible ring in the accent color */
 @layer base {
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
+
+  /* No double-tap-zoom delay on the nav and CTAs. */
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Section anchors clear the 64px fixed app bar. Also read back by
+     ui/SmoothScroll.tsx so the animated travel lands at the same place. */
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+
+  /* Hash targets get focus moved to them programmatically (see SmoothScroll) so
+     keyboard users continue from the right place. They're page-sized landmarks,
+     so a ring here would frame a whole section instead of pointing at anything.
+     Everything genuinely interactive keeps its ring. */
+  [tabindex="-1"]:focus-visible {
+    outline: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   02 · Logo signature — `< MS />`.
+
+   Brackets are weight 500 so they read as containers, not letters; the initials
+   are weight 700 so they hold the centre. Tracking −0.045em across the lockup,
+   and the gap between each bracket and MS is 0.135 × cap height. All three
+   parts sit on one optical centreline — the brackets are never baseline-shifted.
+
+   The mark is never placed inside a coloured container (§11): it is set
+   directly on the surface, in ink and blue.
+   --------------------------------------------------------------------------- */
+
+.ms-mark {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--font-display);
+  letter-spacing: -0.045em;
+  line-height: 1;
+  white-space: nowrap;
+  /* cap height of Space Grotesk ≈ 0.7em, so 0.135 × cap ≈ 0.0945em */
+  gap: 0.0945em;
+}
+
+.ms-mark__bracket {
+  font-weight: 500;
+  color: var(--color-accent);
+}
+
+.ms-mark__initials {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   Opening sequence — see ui/Loader.tsx.
+
+   One orchestrated moment rather than several scattered ones: brackets in,
+   rule across, curtain up. Total run is 1.35s, and every step animates only
+   `transform` and `opacity` so the whole thing stays on the compositor.
+
+   Like the device slide-in and SmoothScroll, this plays regardless of
+   `prefers-reduced-motion` (owner's call — it is the site's first impression).
+   It is short, self-dismissing and never blocks input, since the overlay ends
+   at `visibility: hidden`.
+   --------------------------------------------------------------------------- */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background-color: var(--color-surface);
+  /* `visibility` is what actually retires the layer: opacity alone would leave
+     an invisible sheet swallowing every click on the page underneath. */
+  animation: loader-out 0.4s cubic-bezier(0.4, 0, 1, 1) 0.95s both;
+}
+
+.loader__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: min(58vw, 340px);
+}
+
+.loader__mark {
+  width: 100%;
+  height: auto;
+  /* The brackets start outside the viewBox, and an SVG clips to it by default —
+     without this they slide in as clipped fragments instead of whole glyphs. */
+  overflow: visible;
+}
+
+.loader__bracket {
+  fill: var(--color-accent);
+}
+
+.loader__initials {
+  fill: var(--color-ink);
+  /* Scale about the initials' own centre rather than the SVG's origin. */
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: loader-initials 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The two brackets share a class, so they're told apart by position: the
+   opening one is the first group in the flipped wrapper, the closing one last.
+   They travel in from opposite sides — x is the one axis the y-flip on their
+   parent leaves untouched, which is why nothing here moves vertically. */
+.loader__bracket:first-child {
+  animation: loader-bracket-left 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.loader__bracket:last-child {
+  animation: loader-bracket-right 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.loader__rule {
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background-image: var(--ms-rule);
+  transform-origin: left center;
+  animation: loader-rule 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.45s both;
+}
+
+@keyframes loader-bracket-left {
+  from {
+    opacity: 0;
+    transform: translateX(-760px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes loader-bracket-right {
+  from {
+    opacity: 0;
+    transform: translateX(760px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes loader-initials {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes loader-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes loader-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   13 · Brand pattern & texture.
+
+   Four textures, all derived from the mark or the grid. One per surface, never
+   two at once, always behind content at 4–8% contrast. Each paints with
+   `currentColor` (or masks it) so the texture follows the active theme instead
+   of needing a second dark-mode definition.
+   --------------------------------------------------------------------------- */
+
+/* Dot grid — 16px pitch. Section backgrounds. */
+.pattern-dots {
+  background-image: radial-gradient(currentColor 1px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+/* Diagonal hairline — 135°, 16px repeat. Empty states, placeholders. */
+.pattern-hairline {
+  background-image: repeating-linear-gradient(
+    135deg,
+    currentColor 0 1px,
+    transparent 1px 16px
+  );
+}
+
+/* Bracket lattice — the mark's brackets, tiled. Covers and hero panels.
+   Drawn as stroked paths rather than type: a background/mask image renders in
+   an isolated context with no access to the page's webfonts, so `<text>` here
+   would silently fall back to a generic face. Masked (not painted) so the
+   lattice inherits `currentColor` and flips with the theme. */
+.pattern-lattice {
+  --lattice: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='88' viewBox='0 0 128 88' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 15 5 22l7 7'/%3E%3Cpath d='M22 30 28 14'/%3E%3Cpath d='M34 15l7 7-7 7'/%3E%3Cpath d='M76 59l-7 7 7 7'/%3E%3Cpath d='M86 74 92 58'/%3E%3Cpath d='M98 59l7 7-7 7'/%3E%3C/svg%3E");
+  background-color: currentColor;
+  mask-image: var(--lattice);
+  mask-size: 128px 88px;
+  mask-repeat: repeat;
+}
+
+/* Every texture layer takes its strength from one place, so the 4–8% rule is
+   enforced by the token rather than by whoever writes the markup. */
+.texture {
+  opacity: var(--ms-texture);
+}
+
+/* Deep field — Blue 700 → Ink, 145° for panels. Covers, panels, splash. */
+.pattern-field {
+  background-image: linear-gradient(
+    145deg,
+    var(--blue-700) 0%,
+    var(--neutral-950) 100%
+  );
+}
+
+/* Signature gradient as a rule — 180° vertical, Blue 700 → Blue 400. */
+.brand-rule {
+  background-image: var(--ms-rule);
 }
 
 /* ---------------------------------------------------------------------------
@@ -149,61 +539,5 @@ body {
   .device-from-left,
   .device-from-right {
     transform: none;
-  }
-}
-
-/* ---------------------------------------------------------------------------
-   Background layer — two slow-drifting accent blobs + fine noise.
-   Transform-only animation so it stays on the compositor. See ui/Background.tsx
-   --------------------------------------------------------------------------- */
-
-@keyframes drift-a {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(8vw, 6vh, 0) scale(1.18);
-  }
-}
-
-@keyframes drift-b {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1.1);
-  }
-  50% {
-    transform: translate3d(-7vw, -5vh, 0) scale(0.92);
-  }
-}
-
-.bg-blob {
-  background-image: radial-gradient(
-    circle closest-side,
-    var(--color-accent-soft),
-    transparent 100%
-  );
-  will-change: transform;
-}
-
-.bg-blob-a {
-  animation: drift-a 26s ease-in-out infinite;
-}
-
-.bg-blob-b {
-  animation: drift-b 34s ease-in-out infinite;
-}
-
-/* ~1kb inline SVG turbulence. Breaks up the gradients so wide, low-chroma
-   ramps don't band on 8-bit displays. */
-.bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.035;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .bg-blob-a,
-  .bg-blob-b {
-    animation: none;
   }
 }

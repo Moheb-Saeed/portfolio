@@ -50,21 +50,21 @@ export function ProjectCard({
 }: ProjectCardProps) {
   return (
     <article>
-      <Title className="font-display text-2xl font-semibold tracking-tight">
-        {project.title}
-      </Title>
-      <p className="mt-1 text-sm text-muted">{project.role}</p>
+      <Title className="text-h3 text-balance">{project.title}</Title>
+      {/* Role and stack are metadata, so they're set in the mono face. */}
+      <p className="mt-2 font-mono text-small text-muted">{project.role}</p>
       {project.description && (
-        <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted">
+        <p className="mt-3 max-w-2xl text-body text-muted text-pretty">
           {project.description}
         </p>
       )}
 
-      <ul className="mt-4 flex flex-wrap gap-2">
+      <ul className="mt-6 flex flex-wrap gap-3">
         {project.stack.map((tech) => (
           <li
             key={tech}
-            className="rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-xs text-muted"
+            translate="no"
+            className="rounded-full border border-line bg-raised px-3 py-2 font-mono text-small text-muted"
           >
             {tech}
           </li>

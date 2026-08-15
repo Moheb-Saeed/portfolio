@@ -108,7 +108,7 @@ export function DeviceFrame({ device, children, screenBg }: DeviceFrameProps) {
         className="absolute"
         style={{
           ...rectStyle(f.hole),
-          backgroundColor: screenBg ?? "var(--color-bg)",
+          backgroundColor: screenBg ?? "var(--color-surface)",
           borderRadius: radiusStyle(f, f.hole),
         }}
       />

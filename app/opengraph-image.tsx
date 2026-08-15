@@ -5,14 +5,26 @@ export const alt = `${site.name} — ${site.role}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Design tokens resolved to sRGB — satori has no oklch support.
-const BG = "#181c25";
-const SURFACE = "#22262f";
-const BORDER = "#3a4150";
-const INK = "#eef0f4";
-const MUTED = "#9aa3b5";
-const LOGO = "#003371"; // oklch(33% 0.12 255) — deep-blue logo chip
+// Brand values as literal sRGB — satori can't read the CSS tokens, which is the
+// documented exception to "colours via tokens only".
+const BLUE_700 = "#1d4ed8";
+const INK = "#0a1628";
+const PAPER = "#ffffff";
+const NEUTRAL_300 = "#cbd5e1"; // stays ≥4.5:1 across the whole gradient
+const HAIRLINE = "rgba(255,255,255,0.24)";
 
+/**
+ * A cover, so it gets the deep field (Blue 700 → Ink at 145°) — one of the two
+ * places the manual allows blue to take a whole surface.
+ *
+ * On a brand-blue field the mark is the knockout lockup: all white, brackets
+ * included. Blue-on-blue is explicitly a "don't" (§14), so the brackets do not
+ * keep their accent colour here.
+ *
+ * Note: satori has no access to the page's webfonts, so the type falls back to
+ * its default sans rather than Space Grotesk / Archivo. The composition, colour
+ * and proportions are the brand's; the letterforms are approximate.
+ */
 export default function OpengraphImage() {
   return new ImageResponse(
     (
@@ -23,49 +35,61 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: BG,
-          padding: 80,
-          // Mirrors the site's drifting accent blob, flattened to a static wash.
-          backgroundImage: `radial-gradient(circle at 85% 15%, ${SURFACE} 0%, ${BG} 55%)`,
+          background: INK,
+          backgroundImage: `linear-gradient(145deg, ${BLUE_700} 0%, ${INK} 100%)`,
+          padding: 96,
+          color: PAPER,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 96,
-              height: 96,
-              borderRadius: 24,
-              background: LOGO,
-              color: "#ffffff",
-              fontSize: 46,
-              fontWeight: 700,
-              letterSpacing: -2,
-            }}
-          >
-            MS
-          </div>
-          <div style={{ display: "flex", fontSize: 26, color: MUTED }}>
-            {site.location}
-          </div>
+        {/* Knockout `< MS />` — set directly on the field, never in a container. */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 6,
+            fontSize: 64,
+            letterSpacing: -3,
+            color: PAPER,
+          }}
+        >
+          <div style={{ display: "flex", fontWeight: 500 }}>&lt;</div>
+          <div style={{ display: "flex", fontWeight: 700 }}>MS</div>
+          <div style={{ display: "flex", fontWeight: 500 }}>/&gt;</div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
+          {/* Signature gradient rule, flattened to the field's own light end. */}
           <div
             style={{
               display: "flex",
-              fontSize: 84,
+              width: 64,
+              height: 3,
+              borderRadius: 999,
+              background: "#60a5fa",
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              marginTop: 24,
+              fontSize: 88,
               fontWeight: 700,
-              color: INK,
               letterSpacing: -3,
             }}
           >
             {site.name}
           </div>
-          <div style={{ display: "flex", marginTop: 16, fontSize: 34, color: MUTED }}>
-            Software engineer specializing in Next.js & React.js
+          <div
+            style={{
+              display: "flex",
+              marginTop: 16,
+              fontSize: 30,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              color: NEUTRAL_300,
+            }}
+          >
+            {site.role} · {site.location}
           </div>
         </div>
 
@@ -73,8 +97,8 @@ export default function OpengraphImage() {
           style={{
             display: "flex",
             gap: 12,
-            borderTop: `1px solid ${BORDER}`,
-            paddingTop: 28,
+            borderTop: `1px solid ${HAIRLINE}`,
+            paddingTop: 32,
           }}
         >
           {["Next.js", "TypeScript", "Node.js", "Tailwind CSS"].map((tech) => (
@@ -82,11 +106,11 @@ export default function OpengraphImage() {
               key={tech}
               style={{
                 display: "flex",
-                border: `1px solid ${BORDER}`,
+                border: `1px solid ${HAIRLINE}`,
                 borderRadius: 999,
-                padding: "8px 18px",
+                padding: "8px 20px",
                 fontSize: 22,
-                color: MUTED,
+                color: NEUTRAL_300,
               }}
             >
               {tech}

@@ -47,6 +47,12 @@ overview; this file focuses on conventions and non-obvious gotchas.
   call — it's core to the Work section). The `.reveal` fade still honors it. If
   you re-add a reduced-motion guard to `.device-*`, the animation will "do
   nothing" for anyone with reduce-motion enabled.
+- **`ui/SmoothScroll.tsx` also ignores `prefers-reduced-motion`** (same call).
+  It owns hash-link scrolling because CSS `scroll-behavior: smooth` gives no
+  duration control, and over this page's distances (~8000px) the browser's own
+  smooth scroll is fast enough to read as a snap. If you re-add the guard, anyone
+  with reduce-motion on gets an instant jump and will report "smooth scrolling is
+  broken" — that is exactly how this was first reported.
 - **`overflow-x: clip` on `html` and `body`** (both — clip on `html` alone still
   scrolls) contains the device layers that start off-screen at `translateX(±100vw)`.
   Uses `clip`, not `hidden`, so the sticky nav still works.

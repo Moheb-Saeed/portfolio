@@ -1,44 +1,47 @@
 type MSLogoProps = {
-  size?: number;
+  /**
+   * Rendered type size — a number is read as px. Drives the whole lockup, gap
+   * and tracking included, since both are expressed in em.
+   */
+  size?: number | string;
+  /**
+   * Initials only — the manual's compact mark. Required below 56px wide, where
+   * the brackets close up and stop reading as containers.
+   */
+  compact?: boolean;
   className?: string;
   title?: string;
 };
 
 /**
- * "MS" monogram in a rounded accent chip. Shared mark used in the NavBar,
- * app icon, and OG image. Pure SVG so it scales crisply at any size.
+ * The `< MS />` signature — a self-closing element containing the initials.
+ *
+ * Set as live text rather than SVG, deliberately: the manual pins the lockup to
+ * a typeface (Space Grotesk), two weights, a tracking value and a gap measured
+ * in cap heights, and text is the only way to honour all four at every size
+ * while still picking up the theme's ink and accent. Geometry and colour live
+ * in `.ms-mark` (globals.css).
+ *
+ * The mark is never given a container — no chip, no plate, no coloured tile.
+ * It sits directly on the surface.
  */
-export function MSLogo({ size = 36, className, title = "Moheb Saeed" }: MSLogoProps) {
+export function MSLogo({
+  size = 24,
+  compact = false,
+  className,
+  title = "Moheb Saeed",
+}: MSLogoProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
+    <span
       role="img"
       aria-label={title}
-      className={className}
+      translate="no"
+      className={`ms-mark ${className ?? ""}`}
+      style={{ fontSize: typeof size === "number" ? `${size}px` : size }}
     >
-      <rect
-        x="4"
-        y="4"
-        width="92"
-        height="92"
-        rx="24"
-        fill="oklch(33% 0.12 255)"
-      />
-      <text
-        x="50"
-        y="50"
-        dominantBaseline="central"
-        textAnchor="middle"
-        fontFamily="var(--font-display), sans-serif"
-        fontWeight="700"
-        fontSize="46"
-        letterSpacing="-2"
-        fill="#ffffff"
-      >
-        MS
-      </text>
-    </svg>
+      {!compact && <span className="ms-mark__bracket">&lt;</span>}
+      <span className="ms-mark__initials">MS</span>
+      {!compact && <span className="ms-mark__bracket">/&gt;</span>}
+    </span>
   );
 }

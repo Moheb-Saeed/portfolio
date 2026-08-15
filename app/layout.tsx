@@ -1,30 +1,56 @@
-import type { Metadata } from "next";
-import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { NavBar } from "@/components/ui/NavBar";
 import { Background } from "@/components/ui/Background";
+import { SmoothScroll } from "@/components/ui/SmoothScroll";
+import { Loader } from "@/components/ui/Loader";
 import { site } from "@/lib/site";
 
-const spaceGrotesk = Space_Grotesk({
+// 08 · Typography. Three families, three jobs — display/logo, text, detail.
+//
+// Self-hosted from `app/fonts` rather than fetched from Google: the static cuts
+// of these families 404'd intermittently on gstatic mid-build, and self-hosting
+// removes the third-party origin from the critical path entirely.
+//
+// Only the weights the type scale actually calls for are declared. The
+// directory holds more faces than this (italics, extra weights) — none are
+// referenced, so none are bundled or served.
+
+/** Display and the `< MS />` signature. 500 for brackets, 700 for initials. */
+const spaceGrotesk = localFont({
   variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
   display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
+  src: [
+    { path: "./fonts/SpaceGrotesk-Medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/SpaceGrotesk-Bold.woff2", weight: "700", style: "normal" },
+  ],
 });
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+/** Headings, UI labels and body copy across every surface. */
+const archivo = localFont({
+  variable: "--font-archivo",
   display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
+  src: [
+    { path: "./fonts/Archivo-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Archivo-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/Archivo-Bold.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/Archivo-ExtraBold.woff2", weight: "800", style: "normal" },
+  ],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
+/** Eyebrows, code, metadata, numbers. 500 is the eyebrow weight. */
+const jetbrainsMono = localFont({
+  variable: "--font-jetbrains-mono",
   display: "swap",
+  fallback: ["ui-monospace", "monospace"],
+  src: [
+    { path: "./fonts/JetBrainsMono-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/JetBrainsMono-Medium.woff2", weight: "500", style: "normal" },
+  ],
 });
 
 const description =
@@ -62,6 +88,14 @@ export const metadata: Metadata = {
   },
 };
 
+/** Browser chrome matches the ground in each mode — Deep Ink / Paper. */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a1628" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+  ],
+};
+
 /** Schema.org Person — helps search engines associate the site with Moheb. */
 const personJsonLd = {
   "@context": "https://schema.org",
@@ -72,10 +106,17 @@ const personJsonLd = {
   description,
   email: `mailto:${site.email}`,
   worksFor: { "@type": "Organization", name: "Webics Agency" },
-  alumniOf: {
-    "@type": "CollegeOrUniversity",
-    name: "Modern Academy for Engineering and Technology",
-  },
+  alumniOf: [
+    {
+      "@type": "CollegeOrUniversity",
+      name: "Modern Academy for Engineering and Technology",
+    },
+    {
+      "@type": "EducationalOrganization",
+      name: "Information Technology Institute (ITI)",
+      description: "Intensive Code Camp (ICC) — MEARN stack, 2025",
+    },
+  ],
   address: {
     "@type": "PostalAddress",
     addressLocality: "Cairo",
@@ -103,7 +144,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} h-full`}
+      className={`${spaceGrotesk.variable} ${archivo.variable} ${jetbrainsMono.variable} h-full`}
     >
       <head>
         <noscript>
@@ -116,7 +157,15 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full">
+        <a
+          href="#main"
+          className="sr-only rounded-input bg-accent-solid px-4 py-2 text-small font-semibold text-on-accent focus:not-sr-only focus:absolute focus:left-5 focus:top-5 focus:z-[60]"
+        >
+          Skip to content
+        </a>
+        <Loader />
         <Background />
+        <SmoothScroll />
         <NavBar />
         {children}
         <Analytics />

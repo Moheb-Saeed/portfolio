@@ -116,7 +116,8 @@ export function DeviceScreen({
         aria-label={`Visit ${title} — opens in a new tab`}
         className="group absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-accent"
       >
-        <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-bg/80 px-3 py-1.5 font-medium text-ink whitespace-nowrap text-xs opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+        {/* Solid, not frosted: §12's "don't" list rules out glassmorphism. */}
+        <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-line bg-raised px-3 py-2 font-mono text-eyebrow uppercase text-ink whitespace-nowrap opacity-0 shadow-raised transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
           {device === "macbook" ? "Visit site ↗" : "↗"}
         </span>
       </a>

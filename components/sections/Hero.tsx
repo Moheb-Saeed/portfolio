@@ -1,56 +1,66 @@
+import { MSLogo } from "@/components/ui/MSLogo";
+import { BrandRule, Eyebrow } from "@/components/ui/Section";
+import { btnPrimary, btnSecondary } from "@/components/ui/button";
 import { site } from "@/lib/site";
 
-const primaryCta =
-  "rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-bright";
-const secondaryCta =
-  "rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-medium text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-soft hover:bg-surface-2";
-
+/**
+ * The cover, translated to a page: mark, signature rule, name, role line — the
+ * same order the brand manual's own cover uses. The bracket lattice behind it
+ * comes from ui/Background.tsx.
+ */
 export function Hero() {
   return (
     <section
       id="home"
-      className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-5 pt-16 sm:px-8"
+      // `svh`, not `vh`: the small viewport is the stable one, so the fold
+      // doesn't jump as mobile browser chrome hides on scroll.
+      className="flex min-h-svh flex-col justify-center px-5 pb-12 pt-24 lg:px-16 lg:pb-24"
     >
       {/* No Reveal here on purpose: the hero is above the fold, so a whileInView
           reveal would fire instantly anyway while shipping the LCP element as
           opacity:0 until hydration. It paints from the server HTML instead. */}
-      <p className="font-mono text-sm text-accent-bright">
-        {site.role} · {site.location}
-      </p>
+      <div className="mx-auto w-full max-w-page">
+        <MSLogo size="clamp(2.5rem, 7vw, 4rem)" />
 
-      <h1 className="mt-4 max-w-4xl font-display font-bold leading-[1.05] tracking-tight text-[clamp(2.25rem,5vw,4rem)]">
-        {site.name}
-      </h1>
+        <BrandRule className="mt-8" />
 
-      {/* TODO(Moheb): final positioning line. */}
-      <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-        Software engineer specializing in Next.js & React.js — pixel-perfect,
-        fast, bilingual-ready.
-      </p>
+        <h1 className="mt-6 font-display text-display text-balance">
+          {site.name}
+        </h1>
 
-      <div className="mt-10 flex flex-wrap gap-3">
-        <a href="#work" className={primaryCta}>
-          View Work
-        </a>
-        <a
-          href={site.github}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={secondaryCta}
-        >
-          GitHub
-        </a>
-        <a
-          href={site.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={secondaryCta}
-        >
-          LinkedIn
-        </a>
-        <a href={site.cv} download className={secondaryCta}>
-          Download CV
-        </a>
+        <Eyebrow className="mt-4">
+          {site.role} · {site.location}
+        </Eyebrow>
+
+        <p className="mt-6 max-w-xl text-body text-muted text-pretty">
+          An engineer who ships the whole thing — architecture, interface and
+          deployment. Next.js, React and Node.
+        </p>
+
+        <div className="mt-12 flex flex-wrap gap-4">
+          <a href="#work" className={btnPrimary}>
+            View work
+          </a>
+          <a
+            href={site.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={btnSecondary}
+          >
+            GitHub
+          </a>
+          <a
+            href={site.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={btnSecondary}
+          >
+            LinkedIn
+          </a>
+          <a href={site.cv} download className={btnSecondary}>
+            Download CV
+          </a>
+        </div>
       </div>
     </section>
   );

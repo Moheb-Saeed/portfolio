@@ -3,22 +3,19 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { submitContact, type ContactState } from "@/app/actions/contact";
+import { btnPrimary } from "./button";
 
 const initialState: ContactState = { status: "idle" };
 
-// No placeholder styling: the fields are labelled, and a muted placeholder
-// would fall below the 4.5:1 contrast floor.
+// 6px radius — the manual's input value. No placeholder styling: the fields are
+// labelled, and a muted placeholder would fall below the 4.5:1 contrast floor.
 const fieldClass =
-  "w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors duration-200 hover:border-accent-soft focus:border-accent";
+  "w-full rounded-input border border-line bg-raised px-4 py-3 text-body text-ink transition-colors duration-200 hover:border-accent focus:border-accent";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg transition-all duration-200 hover:bg-accent-bright disabled:opacity-60"
-    >
+    <button type="submit" disabled={pending} className={`${btnPrimary} disabled:opacity-60`}>
       {pending ? "Sending…" : "Send message"}
     </button>
   );
@@ -27,7 +24,7 @@ function SubmitButton() {
 function FieldError({ id, error }: { id: string; error?: string }) {
   if (!error) return null;
   return (
-    <p id={id} className="mt-1.5 text-xs text-accent-bright">
+    <p id={id} className="mt-2 text-small text-danger">
       {error}
     </p>
   );
@@ -67,7 +64,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm text-muted">
+        <label htmlFor="name" className="mb-2 block text-small text-muted">
           Name
         </label>
         <input
@@ -85,7 +82,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm text-muted">
+        <label htmlFor="email" className="mb-2 block text-small text-muted">
           Email
         </label>
         <input
@@ -95,6 +92,7 @@ export function ContactForm() {
           required
           maxLength={200}
           autoComplete="email"
+          spellCheck={false}
           aria-invalid={!!errors?.email}
           aria-describedby={errors?.email ? "email-error" : undefined}
           className={fieldClass}
@@ -103,7 +101,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="message" className="mb-1.5 block text-sm text-muted">
+        <label htmlFor="message" className="mb-2 block text-small text-muted">
           Message
         </label>
         <textarea
@@ -121,14 +119,14 @@ export function ContactForm() {
 
       <div className="flex flex-wrap items-center gap-4">
         <SubmitButton />
-        <p aria-live="polite" className="text-sm">
+        <p aria-live="polite" className="text-small">
           {state.status === "success" && (
-            <span className="text-accent-bright">
+            <span className="text-accent">
               Thanks — I&apos;ll get back to you shortly.
             </span>
           )}
           {state.status === "error" && state.message && (
-            <span className="text-muted">{state.message}</span>
+            <span className="text-danger">{state.message}</span>
           )}
         </p>
       </div>
