@@ -16,21 +16,39 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - `app/` — App Router. `layout.tsx` holds all metadata + `Person` JSON-LD;
   `actions/contact.ts` is the contact server action; `sitemap.ts`, `robots.ts`,
   `opengraph-image.tsx` are generated routes.
+- `app/fonts/` — self-hosted Space Grotesk / Archivo / JetBrains Mono, wired via
+  `next/font/local` in `layout.tsx`.
 - `components/sections/` — page sections (Hero, Work, About, Contact).
-- `components/ui/` — reusable pieces (device frame/screen, NavBar, forms,
-  Reveal/ClusterReveal).
+- `components/ui/` — reusable pieces: device frame/screen, NavBar, Footer,
+  forms, Reveal/ClusterReveal, `Section` (page shell + `Eyebrow`/`BrandRule`),
+  `button.ts` (shared control classes), `Loader`, `SmoothScroll`, and the two
+  marks — `MSLogo` (live text) and `MSMarkOutline` (generated outlines).
 - `data/projects.ts` — the single source of truth for projects.
 - `lib/` — framework-free logic: `site.ts` (site constants), `contact.ts`
   (validation), `rate-limit.ts` (limiter).
 
 ## Conventions
 
-- **Colors via tokens only.** Use `bg-surface` / `text-muted` etc.; the oklch
-  tokens live in `app/globals.css` under `@theme`. The blue accents are all
-  hue 255 at different lightness. No raw hex in components (the OG image and the
-  SVG logo are the exceptions — satori/SVG can't read CSS tokens).
-- **No animation library.** Enter animations are CSS (`.reveal`, `.device-*`)
-  toggled by `IntersectionObserver`. Animate only `transform`/`opacity`.
+- **`public/MS Brand Manual.pdf` is the design source of truth.** Palette, type
+  scale, spacing scale, radii, elevation, logo construction and the pattern set
+  all come from it; comments cite its section numbers. Read it before changing
+  anything visual — most of the "odd" constants are quoted from a page of it.
+- **Colors via tokens only.** Use `bg-surface` / `bg-raised` / `border-line` /
+  `text-ink` / `text-muted` / `text-accent`; they're defined in
+  `app/globals.css`, where fixed brand hex maps onto semantic `--ms-*` vars that
+  `@theme inline` exposes. No raw hex in components (the OG image and the app
+  icons are the exceptions — satori and standalone SVG can't read CSS tokens).
+- **Dark is the default; light arrives via `prefers-color-scheme`.** The tokens
+  flip, so components need no `dark:` variants. Don't add any.
+- **Two accent tokens, not one.** `--color-accent` (text, links, hairlines)
+  flips per theme; `--color-accent-solid` (filled controls) stays Blue 600 in
+  both. Blue 400 fails contrast under a white label — don't unify them.
+- **Sizes come from the scale.** `text-display/h1/h2/h3/body/small/eyebrow` and
+  `rounded-input/card/panel` carry the manual's values; spacing is the 4px scale
+  with nothing in between. Reach for a token before a raw utility.
+- **No animation library.** Enter animations are CSS (`.reveal`, `.device-*`,
+  `.loader*`) toggled by `IntersectionObserver` or plain delays. Animate only
+  `transform`/`opacity`.
 - **Server-action files (`"use server"`) may only export async functions.**
   Shared schemas/helpers (e.g. the contact Zod schema, `escapeHtml`) live in
   `lib/` so they can be imported and unit-tested.
@@ -60,6 +78,19 @@ overview; this file focuses on conventions and non-obvious gotchas.
   an iframe. Only the `embeddable: false` projects (webics, symk, lifescience)
   have `public/screens/*.webp`. To capture a fresh screenshot, match the MacBook
   screen well's aspect (~1.62, e.g. 1440×888) so `object-cover` doesn't crop.
+- **Don't pin `weight` on the fonts.** They're wired with `next/font/local` from
+  `app/fonts` precisely because `next/font/google` built static gstatic URLs for
+  these families that 404'd mid-build. Only declared weights are bundled.
+- **The app icons and `MSMarkOutline.tsx` are generated artwork**, not
+  hand-drawn: real Space Grotesk outlines carrying the lockup's −0.045em
+  tracking and 0.135 × cap gap. Don't hand-edit the path data — regenerate all
+  three together if the fonts or the lockup change.
+- **Texture strength sits below the manual's quoted 4–8%** (`--ms-texture`).
+  That band assumes ink on paper; the same alpha on a backlit display reads as
+  wallpaper, and the lattice is thin high-frequency stroke work the eye picks
+  out easily. Measured on screen before settling on the value.
+- **A pattern layer that slides needs `overflow: visible`.** An SVG clips to its
+  viewBox, so the loader's brackets arrive as clipped fragments without it.
 - **`next.config.ts` changes need a dev-server restart** (config isn't hot-reloaded).
 - Images serve **AVIF** (WebP fallback); if you add a `quality` prop it must be
   listed in `next.config.ts` → `images.qualities`.
