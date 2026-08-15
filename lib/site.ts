@@ -1,7 +1,8 @@
 export const site = {
-  // TODO(Moheb): set NEXT_PUBLIC_SITE_URL in Vercel to your real domain.
-  // It drives canonical URLs, OG image URLs, sitemap, and JSON-LD.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://moheb-saeed.vercel.app",
+  // Drives canonical URLs, OG image URLs, sitemap, and JSON-LD. Override with
+  // NEXT_PUBLIC_SITE_URL for preview deployments; the default is the real
+  // domain, which is also the one printed on the brand collateral.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://mohebsaeed.com",
   name: "Moheb Saeed",
   role: "Software Engineer",
   location: "Cairo, Egypt",
