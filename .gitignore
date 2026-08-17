@@ -44,3 +44,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# brand collateral — kept out of the repo deliberately (see README)
+MS Brand Manual*.pdf
+public/MS Brand Manual*.pdf

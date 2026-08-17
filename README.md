@@ -3,12 +3,15 @@
 Personal developer portfolio. Single page, built to be fast enough to serve as
 its own performance evidence.
 
-The visual system is not improvised: it implements **MS Brand Manual v1.0**
-(`public/MS Brand Manual.pdf`). Palette, type scale, spacing scale, logo
-construction, radii, elevation and the pattern set all come from it, and the
-code comments cite its section numbers (`§09 · Brand colors`, `§11 · Spacing &
-layout`, and so on). When changing anything visual, that PDF is the source of
-truth — not taste, and not this file.
+The visual system is not improvised: it implements **MS Brand Manual v1.0**.
+Palette, type scale, spacing scale, logo construction, radii, elevation and the
+pattern set all come from it, and the code comments cite its section numbers
+(`§09 · Brand colors`, `§11 · Spacing & layout`, and so on). When changing
+anything visual, that PDF is the source of truth — not taste, and not this file.
+
+> The manual itself is **not in this repo** and is git-ignored, so it can't be
+> committed by accident. Ask Moheb for the current version before doing visual
+> work; the section numbers in the comments are your index into it.
 
 **Stack:** Next.js 16 (App Router, RSC) · React 19 · TypeScript · Tailwind CSS v4 ·
 Zod · Resend · Upstash (optional) · Vitest · Playwright · Vercel Analytics.
@@ -198,7 +201,6 @@ Marked `TODO(Moheb)` in source:
 
 | Path | What |
 | --- | --- |
-| `public/MS Brand Manual.pdf` | The design source of truth. Read before changing anything visual. |
 | `public/Moheb-Saeed_CV.pdf` | CV, linked from the hero. |
 | `public/screens/{webics,symk,lifescience}-{desktop,tablet,mobile}.webp` | Fallback screenshots for the three iframe-blocked projects. |
 | `public/frames/` | Device frame PNGs (MacBook, iPad, iPhone). |

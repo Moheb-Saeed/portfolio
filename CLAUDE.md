@@ -29,10 +29,12 @@ overview; this file focuses on conventions and non-obvious gotchas.
 
 ## Conventions
 
-- **`public/MS Brand Manual.pdf` is the design source of truth.** Palette, type
-  scale, spacing scale, radii, elevation, logo construction and the pattern set
-  all come from it; comments cite its section numbers. Read it before changing
-  anything visual — most of the "odd" constants are quoted from a page of it.
+- **The MS Brand Manual is the design source of truth** — palette, type scale,
+  spacing scale, radii, elevation, logo construction and the pattern set all
+  come from it, and comments cite its section numbers. Most of the "odd"
+  constants here are quoted from a page of it, so read it before changing
+  anything visual. It is **not in this repo** (git-ignored, kept out
+  deliberately) — ask Moheb for the current PDF.
 - **Colors via tokens only.** Use `bg-surface` / `bg-raised` / `border-line` /
   `text-ink` / `text-muted` / `text-accent`; they're defined in
   `app/globals.css`, where fixed brand hex maps onto semantic `--ms-*` vars that
