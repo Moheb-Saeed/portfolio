@@ -92,12 +92,18 @@ All of it lives in `app/globals.css`.
 - **Work is grouped** into categories — `Webics Agency`, `Freelance work`,
   `Projects` — driven by the `category` field and `CATEGORY_ORDER` in
   `data/projects.ts` and rendered as sections in `components/sections/Work.tsx`.
-- **Device showcase** (`components/ui/DeviceScreen.tsx`) renders each embeddable
-  project's live site in a decorative, sandboxed iframe at its true viewport
-  size, scaled down with `transform: scale()` measured by a `ResizeObserver`.
-  Iframes mount only within 200px of the viewport; the screen is transparent so
-  the site's own background shows while it loads. Sites that block framing fall
-  back to a screenshot — see the `embeddable` flag in `data/projects.ts`.
+- **Device showcase** (`components/ui/DeviceScreen.tsx`) fills each frame's
+  screen well with a screenshot via `next/image`. Only the first card's MacBook
+  is eager; the rest lazy-load, and the iPad — `display:none` below `md` — is
+  never fetched on phones. The component holds no state, so it stays server-only
+  and ships no JS; the frame's `screenBg` backs the well while a shot decodes.
+  Earlier versions embedded each site in a live iframe. That cost ~10MB and ~4MB
+  of third-party JS across 12 documents per page load, and broke silently
+  whenever a client site was redesigned, went down, or started refusing to be
+  framed. Screenshots are captured at the viewport each frame represents and
+  clipped to the well's aspect (`lib/device-frames.ts`), so they show the same
+  pixels the embeds did — the whole section is now 194KB on desktop, 113KB on
+  mobile, with no third-party requests. Regenerate with `pnpm screens`.
 - **Cluster slide-in.** On scroll each device cluster slides to its resting
   position — MacBook from the left screen edge, iPad + iPhone from the right —
   via CSS keyframes toggled by one `IntersectionObserver`
@@ -137,6 +143,14 @@ All of it lives in `app/globals.css`.
   (`lib/contact.ts`), a honeypot + minimum-fill-time, per-IP rate limiting
   (`lib/rate-limit.ts` — Upstash if configured, else in-memory), an
   HTML-escaped email body, and delivery via Resend.
+- **Privacy policy** (`app/privacy/page.tsx`) is the site's only sub-page and
+  the first user of the `text-h1` step the scale reserved for exactly that. Its
+  clauses are a `CLAUSES` array rather than hand-written markup, so the contents
+  list and the sections render from one source and can't drift apart. What it
+  claims is checkable against the code — the contact fields, the IP-keyed
+  5-per-10-minutes limiter, and the analytics mount — so re-read those before
+  editing a claim. It is linked from the footer and from the contact form, since
+  the notice has to appear where the data is actually handed over.
 - **Security headers** are set for every response in `next.config.ts`:
   `Content-Security-Policy: frame-ancestors 'none'`, `X-Frame-Options: DENY`,
   `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`,
@@ -202,6 +216,6 @@ Marked `TODO(Moheb)` in source:
 | Path | What |
 | --- | --- |
 | `public/Moheb-Saeed_CV.pdf` | CV, linked from the hero. |
-| `public/screens/{webics,symk,lifescience}-{desktop,tablet,mobile}.webp` | Fallback screenshots for the three iframe-blocked projects. |
+| `public/screens/<slug>-{desktop,tablet,mobile}.webp` | Project screenshots, one set per project. Regenerate with `pnpm screens`. |
 | `public/frames/` | Device frame PNGs (MacBook, iPad, iPhone). |
 | `app/fonts/` | Space Grotesk, Archivo and JetBrains Mono, self-hosted. |

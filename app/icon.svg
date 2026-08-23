@@ -13,7 +13,15 @@
     vanish on a light tab strip.
 
     Note: §03 specifies the compact initials-only mark below 56px, so at 16px
-    tab size this is deliberately outside the manual's guidance.
+    tab size this is deliberately outside the manual's guidance — kept this way
+    on Moheb's explicit call, and measured before the call was made.
+
+    The lockup is 4.15:1, so inside a square box it is width-bound: it already
+    fills 96% of the width while the initials reach only 23% of the height, and
+    no scaling can improve that. Swapping to the compact mark was tried and
+    reverted; it stood the initials at 51% (2.2x the cap height on the tab) but
+    lost the brackets, which is the trade that was declined. So don't reopen
+    this as a sizing bug — the only lever is dropping the brackets.
   -->
   <style>
     .bracket { fill: #2563eb }

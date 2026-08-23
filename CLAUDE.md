@@ -8,14 +8,16 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - Dev: `pnpm dev` · Build: `pnpm build` · Lint: `pnpm lint`
 - Typecheck: `npx tsc --noEmit`
 - Unit tests: `pnpm test` (Vitest, node env) · E2E: `pnpm test:e2e` (Playwright)
+- Project screenshots: `pnpm screens [slug...]` (all projects if no slug)
 - Package manager is **pnpm**. Native build scripts are allow-listed in
   `pnpm-workspace.yaml` under `allowBuilds` (e.g. `esbuild: true` for Vitest).
 
 ## Layout
 
 - `app/` — App Router. `layout.tsx` holds all metadata + `Person` JSON-LD;
-  `actions/contact.ts` is the contact server action; `sitemap.ts`, `robots.ts`,
-  `opengraph-image.tsx` are generated routes.
+  `actions/contact.ts` is the contact server action; `privacy/page.tsx` is the
+  only sub-page; `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` are generated
+  routes.
 - `app/fonts/` — self-hosted Space Grotesk / Archivo / JetBrains Mono, wired via
   `next/font/local` in `layout.tsx`.
 - `components/sections/` — page sections (Hero, Work, About, Contact).
@@ -25,7 +27,9 @@ overview; this file focuses on conventions and non-obvious gotchas.
   marks — `MSLogo` (live text) and `MSMarkOutline` (generated outlines).
 - `data/projects.ts` — the single source of truth for projects.
 - `lib/` — framework-free logic: `site.ts` (site constants), `contact.ts`
-  (validation), `rate-limit.ts` (limiter).
+  (validation), `rate-limit.ts` (limiter), `device-frames.ts` (frame geometry
+  + `wellAspect`, shared by the component, the capture script and the tests).
+- `scripts/capture-screens.mjs` — regenerates `public/screens/*.webp`.
 
 ## Conventions
 
@@ -57,6 +61,21 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - Tests sit beside the code as `*.test.ts` (Vitest); browser specs live in
   `e2e/*.spec.ts` (Playwright) and are excluded from Vitest.
 
+- **The privacy policy must match the code.** `app/privacy/page.tsx` describes
+  the real data flow — the three contact fields, the IP-keyed 5-per-10-minutes
+  limiter, cookieless analytics, no cookies or storage anywhere. Change any of
+  those and the page becomes a false statement, so update it in the same commit.
+  Its `LAST_UPDATED` is a hand-edited literal on purpose: unlike the footer's
+  computed year, an effective date that moved on its own would misstate when the
+  terms changed. The processors clause lists Vercel, Resend and Google only —
+  Upstash is deliberately absent because no `UPSTASH_*` env var is set and the
+  limiter runs in memory. Configure Upstash and it becomes a third-party
+  recipient that the clause has to name.
+- **Nav links are route-aware.** `NavBar` emits bare `#work` on the homepage, so
+  `SmoothScroll`'s `a[href^="#"]` handler animates the travel, and `/#work`
+  everywhere else, where a bare hash would resolve against the sub-page and go
+  nowhere. Adding a route means keeping that split.
+
 ## Gotchas
 
 - **Dev image cache (Next 16 + Turbopack) is at `.next/dev/cache/images`**, not
@@ -76,10 +95,21 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - **`overflow-x: clip` on `html` and `body`** (both — clip on `html` alone still
   scrolls) contains the device layers that start off-screen at `translateX(±100vw)`.
   Uses `clip`, not `hidden`, so the sticky nav still works.
-- **Embeddable projects have no screenshot files** — they render the live site in
-  an iframe. Only the `embeddable: false` projects (webics, symk, lifescience)
-  have `public/screens/*.webp`. To capture a fresh screenshot, match the MacBook
-  screen well's aspect (~1.62, e.g. 1440×888) so `object-cover` doesn't crop.
+- **Every project renders from screenshots; there are no live embeds.** Framing
+  the client sites cost ~10MB and ~4MB of third-party JS across 12 iframes, and
+  put the section at the mercy of sites we don't control. Capture with
+  `pnpm screens [slug...]` (`scripts/capture-screens.mjs`) — it renders each site
+  at the viewport its frame represents and clips to the well's exact aspect, so
+  `object-cover` crops nothing. Sizes come from `lib/device-frames.ts`
+  (`wellAspect`), which `DeviceFrame`, the script and the tests all share — don't
+  re-derive them anywhere else.
+- **Recheck `screenBg` after recapturing.** It fills the strip above the notch and
+  backs the well while the shot lazy-loads, so it must match the screenshot's top
+  edge. It used to be sampled from inside the iframe, which could differ from the
+  standalone site — that's why EcoSphere was `#0a0909` and is now `#ffffff`.
+- **`pnpm screens` can catch a site mid-animation.** Marquees and sliders don't
+  settle, so review every file it writes before committing; webics and
+  lifescience are captured by hand for exactly this reason.
 - **Don't pin `weight` on the fonts.** They're wired with `next/font/local` from
   `app/fonts` precisely because `next/font/google` built static gstatic URLs for
   these families that 404'd mid-build. Only declared weights are bundled.
@@ -87,6 +117,12 @@ overview; this file focuses on conventions and non-obvious gotchas.
   hand-drawn: real Space Grotesk outlines carrying the lockup's −0.045em
   tracking and 0.135 × cap gap. Don't hand-edit the path data — regenerate all
   three together if the fonts or the lockup change.
+- **The favicon keeps the full lockup, against §03's 56px rule** — owner's call.
+  The lockup is 4.15:1, so in a square box it is width-bound: already 96% of the
+  width with the initials only 23% of the height, and no scaling changes that.
+  The compact initials-only mark was tried (51% tall, 2.2× the cap height) and
+  reverted because it drops the brackets. Small type on the tab is the accepted
+  cost, so don't refile it as a sizing bug.
 - **Texture strength sits below the manual's quoted 4–8%** (`--ms-texture`).
   That band assumes ink on paper; the same alpha on a backlit display reads as
   wallpaper, and the lattice is thin high-frequency stroke work the eye picks
@@ -96,6 +132,23 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - **`next.config.ts` changes need a dev-server restart** (config isn't hot-reloaded).
 - Images serve **AVIF** (WebP fallback); if you add a `quality` prop it must be
   listed in `next.config.ts` → `images.qualities`.
+
+- **The anti-spam e2e test submits a message too short to validate, on purpose.**
+  Its guard only fires while the server sees under `MIN_FILL_MS` (3s) between
+  form-open and submit, and a loaded run overshoots that — `submitContact` then
+  reads the submission as genuine and carries on to a real Resend send. Against
+  a dev server holding the live key from `.env.local`, that put real "Portfolio
+  enquiry from Jane Doe" mail in Moheb's inbox. Validation sits between the
+  guard and the send, so a sub-10-character message makes the send unreachable
+  whatever the timing or the server. Give that test a "valid" message and the
+  bug is back. The test can still fail on a slow run; it just cannot mail anyone.
+- **E2E reuses whatever answers on :3000.** That is what keeps it ~15s rather
+  than a minute — a dedicated port would stop it reusing the dev server, and
+  `next dev` refuses to run twice for one project on any port, so the suite
+  would have to `pnpm build && pnpm start` first. The cost is that if another
+  project holds :3000, the whole suite silently runs against that app and fails
+  on the first title assertion. Start this project's `pnpm dev` before running,
+  or point `baseURL` at the port it actually took.
 
 ## Before committing
 
