@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { MSLogo } from "./MSLogo";
 
 const SECTIONS = [
@@ -12,6 +13,11 @@ const SECTIONS = [
 export function NavBar() {
   const [active, setActive] = useState<string>("");
   const [scrolled, setScrolled] = useState(false);
+  // The sections only exist on the homepage. Bare `#work` from a sub-page
+  // would resolve against that page and go nowhere, so link back to `/#work`
+  // there — and keep the bare hash at home, where SmoothScroll's
+  // `a[href^="#"]` handler needs it to animate the travel.
+  const onHome = usePathname() === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -21,6 +27,7 @@ export function NavBar() {
   }, []);
 
   useEffect(() => {
+    if (!onHome) return; // nothing to spy on outside the homepage
     const ids = ["home", ...SECTIONS.map((s) => s.id)];
     const targets = ids
       .map((id) => document.getElementById(id))
@@ -39,7 +46,7 @@ export function NavBar() {
 
     targets.forEach((t) => observer.observe(t));
     return () => observer.disconnect();
-  }, []);
+  }, [onHome]);
 
   return (
     <header
@@ -56,8 +63,8 @@ export function NavBar() {
         className="mx-auto flex h-16 max-w-page items-center justify-between px-5 lg:px-16"
       >
         <a
-          href="#home"
-          aria-label="Moheb Saeed — back to top"
+          href={onHome ? "#home" : "/"}
+          aria-label={onHome ? "Moheb Saeed — back to top" : "Moheb Saeed — home"}
           className="rounded-input"
         >
           {/* ~100px wide, clearing the manual's 96px floor for the full lockup. */}
@@ -70,7 +77,7 @@ export function NavBar() {
             return (
               <li key={s.id}>
                 <a
-                  href={`#${s.id}`}
+                  href={onHome ? `#${s.id}` : `/#${s.id}`}
                   aria-current={isActive ? "true" : undefined}
                   className={`relative rounded-input px-3 py-2 text-small font-semibold transition-colors duration-200 ${
                     isActive ? "text-ink" : "text-muted hover:text-ink"

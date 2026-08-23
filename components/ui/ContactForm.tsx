@@ -130,6 +130,19 @@ export function ContactForm() {
           )}
         </p>
       </div>
+
+      {/* GDPR Art. 13 wants the notice where the data is handed over, not only
+          linked from the footer — so it sits with the button that sends it. */}
+      <p className="mt-4 text-small text-muted">
+        Your message is emailed to me and stored nowhere else. See the{" "}
+        <a
+          href="/privacy"
+          className="text-accent underline underline-offset-4 hover:no-underline"
+        >
+          privacy policy
+        </a>
+        .
+      </p>
     </form>
   );
 }

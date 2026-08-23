@@ -55,6 +55,12 @@ function memoryLimit(
 /* -------------------------------------------------------------------------- */
 
 // undefined = not resolved yet, null = not configured.
+//
+// Nothing sets UPSTASH_REDIS_REST_URL / _TOKEN today, so every request takes
+// the in-memory path above and no IP-derived key ever leaves the server. The
+// privacy policy says exactly that and lists no Redis provider — turning
+// Upstash on makes it a third-party recipient, so add it back to the
+// processors clause in app/privacy/page.tsx in the same change.
 let redis: Redis | null | undefined;
 
 function getRedis(): Redis | null {

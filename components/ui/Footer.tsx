@@ -15,7 +15,7 @@ export function Footer() {
 
   return (
     <footer className="px-5 pb-12 lg:px-16 lg:pb-24">
-      <div className="mx-auto w-full max-w-page border-t border-line pt-8">
+      <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-4 border-t border-line pt-8">
         {/* Typography sits on the <p>: `.ms-mark` pins its own family, size and
             colours, so the mark ignores all three and keeps its lockup.
             text-small, not the eyebrow the old "Developed by" used — that 12px
@@ -26,6 +26,17 @@ export function Footer() {
           <MSLogo size={18} title={site.name} />
           <span>All rights reserved.</span>
         </p>
+
+        {/* A privacy notice nobody can find does not do its job — GDPR Art. 12
+            wants it easily accessible, so it sits in the one place every page
+            already ends. Named for the page it opens rather than shortened, so
+            the destination is unambiguous out of context. */}
+        <a
+          href="/privacy"
+          className="font-mono text-small text-muted underline underline-offset-4 transition-colors duration-200 hover:text-accent"
+        >
+          Privacy Policy
+        </a>
       </div>
     </footer>
   );
