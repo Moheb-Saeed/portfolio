@@ -1,18 +1,13 @@
 import type { Project } from "@/data/projects";
-import { DeviceFrame, type Device } from "./DeviceFrame";
+import { DeviceFrame } from "./DeviceFrame";
 import { DeviceScreen } from "./DeviceScreen";
 import { ClusterReveal } from "./ClusterReveal";
+import { SCREENSHOT_KEY, type Device } from "@/lib/device-frames";
 
 type ProjectCardProps = {
   project: Project;
   priority?: boolean; // first project only
   titleAs?: "h3" | "h4"; // h4 when nested under a category heading
-};
-
-const SCREENSHOT_KEY: Record<Device, keyof Project["screens"]> = {
-  macbook: "desktop",
-  ipad: "tablet",
-  iphone: "mobile",
 };
 
 function Showcase({
@@ -34,7 +29,6 @@ function Showcase({
           device={device}
           title={project.title}
           liveUrl={project.liveUrl}
-          embeddable={project.embeddable}
           screenshot={project.screens[SCREENSHOT_KEY[device]]}
           priority={priority}
         />

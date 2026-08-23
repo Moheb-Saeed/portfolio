@@ -1,113 +1,75 @@
-"use client";
-
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import type { Device } from "./DeviceFrame";
 
-// Heights set so each viewport's aspect matches the frame's measured screen
-// cutout, so a width-scaled iframe fills the well with no letterboxing.
-const VIEWPORTS: Record<Device, { width: number; height: number }> = {
-  macbook: { width: 1440, height: 932 },
-  ipad: { width: 820, height: 1174 },
-  iphone: { width: 390, height: 848 },
-};
-
+/**
+ * Rendered width of each screen well, measured against the real layout rather
+ * than estimated: an overstated `sizes` pushes the browser into a larger
+ * srcset entry and ships bytes the frame can't show. Values are rounded up to
+ * the next whole vw so no breakpoint ever under-states and blurs.
+ *
+ * Well width = frame width x the content inset in DeviceFrame's FRAMES[].
+ *   macbook  78% of the container above md, full width below; caps at 819px.
+ *   ipad     26% of the container, hidden below md; caps at 299px.
+ *   iphone   12.5% above md / 20% below; caps at 147px.
+ * The container itself caps at ~1280px, so every well is fixed past ~1440vw.
+ */
 const IMAGE_SIZES: Record<Device, string> = {
-  macbook: "(min-width: 1152px) 880px, (min-width: 768px) 78vw, 100vw",
-  ipad: "(min-width: 1152px) 300px, 26vw",
-  iphone: "(min-width: 1152px) 145px, 20vw",
+  macbook: "(min-width: 1440px) 820px, (min-width: 768px) 62vw, 80vw",
+  ipad: "(min-width: 1440px) 300px, 23vw",
+  iphone: "(min-width: 1440px) 150px, (min-width: 768px) 12vw, 18vw",
 };
 
 type DeviceScreenProps = {
   device: Device;
   title: string;
   liveUrl: string;
-  embeddable: boolean;
   screenshot: string;
   priority?: boolean;
 };
 
 /**
- * The screen inside a DeviceFrame. Embeddable projects render the live site
- * in a decorative iframe at true viewport size, scaled down to fit; the rest
- * render a screenshot via next/image. A permanent overlay <a> is the only
- * interactive/focusable element and opens the real site in a new tab.
+ * The screen inside a DeviceFrame: a screenshot of the project, with a
+ * permanent overlay <a> as the only interactive/focusable element, opening the
+ * real site in a new tab.
+ *
+ * Screenshots, not live embeds. Framing each site cost ~1.4-5.4MB and ~0.7-1.2MB
+ * of third-party JS per project, x3 frames per card - and left the section at the
+ * mercy of sites we don't control (a redesign, an outage, or a new
+ * frame-ancestors header silently emptied a frame). The screenshots are captured
+ * at the exact viewport each iframe used and clipped to the well, so they show
+ * the same pixels the embed did. Regenerate with `scripts/capture-screens.mjs`.
+ *
+ * Deliberately a server component: with the iframe gone there is no state, no
+ * ResizeObserver and no IntersectionObserver left here, so it needs no client
+ * directive and ships no JS. Lazy loading is the browser's, via next/image.
  */
 export function DeviceScreen({
   device,
   title,
   liveUrl,
-  embeddable,
   screenshot,
   priority = false,
 }: DeviceScreenProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0);
-  const [showIframe, setShowIframe] = useState(false);
-  const { width, height } = VIEWPORTS[device];
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || !embeddable) return;
-
-    const ro = new ResizeObserver(([entry]) => {
-      setScale(entry.contentRect.width / width);
-    });
-    ro.observe(el);
-
-    // Mount the iframe only when the frame approaches the viewport.
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShowIframe(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "200px" }
-    );
-    io.observe(el);
-
-    return () => {
-      ro.disconnect();
-      io.disconnect();
-    };
-  }, [embeddable, width]);
-
   return (
-    <div
-      ref={containerRef}
-      // Transparent so the frame's screenBg backing shows through while an
-      // iframe loads — the screen reads as the site's own colour, not dark.
-      className="relative h-full w-full overflow-hidden"
-    >
-      {embeddable ? (
-        showIframe &&
-        scale > 0 && (
-          <iframe
-            src={liveUrl}
-            title={`${title} — live preview`}
-            tabIndex={-1}
-            aria-hidden="true"
-            scrolling="no"
-            loading="lazy"
-            sandbox="allow-scripts allow-same-origin"
-            className="pointer-events-none absolute left-0 top-0 origin-top-left border-0"
-            style={{ width, height, transform: `scale(${scale})` }}
-          />
-        )
-      ) : (
-        <Image
-          src={screenshot}
-          // Describe the primary (desktop) shot for image search; the tablet and
-          // phone are duplicate views of the same site, so they stay decorative.
-          alt={device === "macbook" ? `${title} — desktop website preview` : ""}
-          fill
-          sizes={IMAGE_SIZES[device]}
-          priority={priority}
-          quality={65}
-          className="object-cover object-top"
-        />
-      )}
+    <div className="relative h-full w-full overflow-hidden">
+      <Image
+        src={screenshot}
+        // Describe the primary (desktop) shot for image search; the tablet and
+        // phone are duplicate views of the same site, so they stay decorative.
+        alt={device === "macbook" ? `${title} — desktop website preview` : ""}
+        fill
+        sizes={IMAGE_SIZES[device]}
+        // Only the first card's MacBook is eager — it's the section's LCP
+        // candidate. Everything else defers to the browser's lazy loader, which
+        // also skips the iPad entirely below md, where it's display:none.
+        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        // Decode off the main thread so a frame scrolling into view can't
+        // block interaction.
+        decoding="async"
+        quality={65}
+        className="object-cover object-top"
+      />
 
       <a
         href={liveUrl}

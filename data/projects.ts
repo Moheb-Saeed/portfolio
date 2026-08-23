@@ -15,17 +15,19 @@ export type Project = {
   role: string;
   stack: string[];
   liveUrl: string;
-  embeddable: boolean; // verified 2026-07-09 via X-Frame-Options / CSP frame-ancestors headers
-  screens: { desktop: string; tablet: string; mobile: string }; // screenshot fallbacks
+  screens: { desktop: string; tablet: string; mobile: string };
   description: string; // what it is / the nature of the business; shown under the card
   draft?: boolean; // true = hidden from the site until the project goes live
-  // Fills the iPhone status strip above the notch so it reads seamlessly with
-  // the screen. Sampled from the content as actually rendered inside the frame
-  // — not from the live site loaded standalone, which can differ (EcoSphere
-  // renders light on its own but dark in the embed).
+  // Fills the MacBook/iPhone status strip above the notch so it reads
+  // seamlessly with the screen, and backs the well while the screenshot lazy-
+  // loads. Sampled from the top edge of the project's own screenshot — keep it
+  // in step whenever the screenshots are recaptured.
   screenBg: string;
 };
 
+// Every project ships all three; capture them with `pnpm screens`
+// (scripts/capture-screens.mjs), which renders each site at the exact
+// viewport its device frame expects.
 const screens = (slug: string) => ({
   desktop: `/screens/${slug}-desktop.webp`,
   tablet: `/screens/${slug}-tablet.webp`,
@@ -42,7 +44,6 @@ export const projects: Project[] = [
     role: "Architecture & frontend",
     stack: ["Next.js", "Tailwind CSS", "Motion", "Docker"],
     liveUrl: "https://webics.agency",
-    embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("webics"),
     description:
       "A digital solutions agency building modern, responsive websites alongside custom software, e-commerce platforms, and UI/UX design for growing businesses.",
@@ -55,7 +56,6 @@ export const projects: Project[] = [
     role: "Frontend development",
     stack: ["Next.js", "GSAP", "Motion"],
     liveUrl: "https://seencreatives.com",
-    embeddable: true,
     screens: screens("seen"),
     description:
       "A creative agency shaping brand identities and visual storytelling through design-led campaigns.",
@@ -68,7 +68,6 @@ export const projects: Project[] = [
     role: "Frontend development",
     stack: ["Next.js", "Motion"],
     liveUrl: "https://newbeat.agency",
-    embeddable: true,
     screens: screens("newbeat"),
     description:
       "A creative advertising agency delivering end-to-end audio and video production for brands across Egypt and the Middle East.",
@@ -81,7 +80,6 @@ export const projects: Project[] = [
     role: "Full-stack development",
     stack: ["Next.js", "Payload CMS", "PostgreSQL", "Docker"],
     liveUrl: "https://capitalearth-eg.com",
-    embeddable: true,
     screens: screens("capital-earth"),
     description:
       "A bilingual (AR/EN) real-estate platform that helps buyers find properties and finance them through flexible payment plans and consultation.",
@@ -94,7 +92,6 @@ export const projects: Project[] = [
     role: "Frontend development",
     stack: ["Next.js", "Motion"],
     liveUrl: "https://cairawfilms.com",
-    embeddable: true,
     screens: screens("cairaw"),
     description:
       "A full-service media production house crafting brand stories through cinematography, video, photography, and audio.",
@@ -108,7 +105,6 @@ export const projects: Project[] = [
     role: "Shopify storefront development",
     stack: ["Shopify", "Liquid"],
     liveUrl: "https://scentsyoumayknow.com",
-    embeddable: false, // Shopify: XFO: DENY + frame-ancestors 'none'
     screens: screens("symk"),
     description:
       "A fragrance house creating modern, unisex perfumes inspired by emotion, elegance, and timeless individuality.",
@@ -121,7 +117,6 @@ export const projects: Project[] = [
     role: "Full-stack developer (freelance)",
     stack: ["Next.js", "Tailwind CSS", "Vercel"],
     liveUrl: "https://www.lifescience-eg.com",
-    embeddable: false, // XFO: DENY + frame-ancestors 'none'
     screens: screens("lifescience"),
     description:
       "Calibration, maintenance, and technical support for HPLC and GC laboratory systems, plus qualification, spare parts, and training.",
@@ -134,10 +129,12 @@ export const projects: Project[] = [
     role: "Personal project — frontend",
     stack: ["Next.js", "MongoDB", "Stripe", "Zod"],
     liveUrl: "https://eco-sphere-kappa.vercel.app",
-    embeddable: true,
     screens: screens("ecosphere"),
     description:
       "A sustainable e-commerce store for eco-friendly products, built end-to-end with a full cart-to-checkout flow on Stripe.",
-    screenBg: "#0a0909",
+    // White, not the old #0a0909: the site only rendered dark inside the
+    // sandboxed iframe (its theme read of localStorage threw there and fell
+    // back to dark). Standalone — and so in the screenshot — it is light.
+    screenBg: "#ffffff",
   },
 ];

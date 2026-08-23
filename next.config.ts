@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
-// Sent on every response. These harden the site without touching the
-// device-preview iframes — X-Frame-Options / frame-ancestors control who may
-// frame THIS site (clickjacking), not the third-party sites it embeds.
+// Sent on every response. X-Frame-Options / frame-ancestors control who may
+// frame THIS site (clickjacking).
 const securityHeaders = [
   // Don't let browsers MIME-sniff responses into a different content type.
   { key: "X-Content-Type-Options", value: "nosniff" },

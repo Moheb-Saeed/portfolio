@@ -16,8 +16,7 @@ type RevealProps = {
  * under `.reveal`, so there is still exactly one place to tune it.
  *
  * The -60px margin fires the reveal slightly before the element is fully on
- * screen, and is tighter than DeviceScreen's +200px iframe rootMargin, so a
- * device frame fades in first and its iframe loads behind it.
+ * screen, so a device frame has begun fading in by the time it lands.
  */
 export function Reveal({ children, className }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);

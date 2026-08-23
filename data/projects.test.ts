@@ -1,5 +1,22 @@
 import { describe, it, expect } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
 import { projects, CATEGORY_ORDER } from "./projects";
+import { SCREENSHOT_KEY, wellAspect, type Device } from "@/lib/device-frames";
+
+/** Width/height from a WebP header — enough to check shape without a decoder. */
+function webpSize(file: string): { width: number; height: number } {
+  const b = readFileSync(file);
+  const format = b.toString("ascii", 12, 16);
+  if (format === "VP8 ")
+    return { width: b.readUInt16LE(26) & 0x3fff, height: b.readUInt16LE(28) & 0x3fff };
+  if (format === "VP8L") {
+    const bits = b.readUInt32LE(21);
+    return { width: (bits & 0x3fff) + 1, height: ((bits >> 14) & 0x3fff) + 1 };
+  }
+  if (format === "VP8X")
+    return { width: b.readUIntLE(24, 3) + 1, height: b.readUIntLE(27, 3) + 1 };
+  throw new Error(`${file}: unrecognised WebP chunk ${format}`);
+}
 
 describe("projects data integrity", () => {
   it("has at least one project", () => {
@@ -49,6 +66,33 @@ describe("projects data integrity", () => {
   it("uses a hex color for each screenBg", () => {
     for (const p of projects) {
       expect(p.screenBg).toMatch(/^#[0-9a-fA-F]{3,8}$/);
+    }
+  });
+});
+
+describe("project screenshots", () => {
+  // Every project renders from screenshots now — there is no live-embed path
+  // left to cover for a missing file, so an absent one is a broken image.
+  it("ships all three screenshots for every project", () => {
+    for (const p of projects) {
+      for (const src of Object.values(p.screens)) {
+        expect(existsSync(`public${src}`), `missing public${src}`).toBe(true);
+      }
+    }
+  });
+
+  // DeviceScreen fits these with `object-cover`, so anything off-aspect is
+  // silently cropped. The tolerance is loose because three captures predate the
+  // well-exact sizing; it still catches a transposed or wrongly-sized file.
+  it("shapes each screenshot to its device's screen well", () => {
+    for (const p of projects) {
+      for (const device of Object.keys(SCREENSHOT_KEY) as Device[]) {
+        const src = p.screens[SCREENSHOT_KEY[device]];
+        const { width, height } = webpSize(`public${src}`);
+        const drift = Math.abs(width / height / wellAspect(device) - 1);
+        expect(drift, `${src} is ${(drift * 100).toFixed(1)}% off the well aspect`)
+          .toBeLessThan(0.12);
+      }
     }
   });
 });
