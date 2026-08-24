@@ -130,6 +130,20 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - **A pattern layer that slides needs `overflow: visible`.** An SVG clips to its
   viewBox, so the loader's brackets arrive as clipped fragments without it.
 - **`next.config.ts` changes need a dev-server restart** (config isn't hot-reloaded).
+- **The CV is `noindex`ed by header, not by `robots.txt`** — and the difference
+  matters. `public/Moheb-Saeed_CV.pdf` is the one file carrying the phone number
+  beside the name and email, and an indexed PDF is what bulk harvesters scrape,
+  so `next.config.ts` sends `X-Robots-Tag: noindex` on that path only. Do *not*
+  "tighten" this with a `Disallow` in `robots.ts`: a disallowed URL is never
+  crawled, so the `noindex` would never be read, and the URL can still be
+  indexed from a link — strictly worse than the header. `robots.txt` must keep
+  saying `Allow: /`. The rule's `source` comes from `site.cv` so renaming the
+  file can't silently drop it.
+- **The CSP is deliberately partial.** It carries `frame-ancestors`, `base-uri`,
+  `form-action` and `object-src` — every directive that needs no nonce. There is
+  no `script-src` because Next inlines its bootstrap and flight data, so a real
+  one means threading a per-request nonce through middleware. Absence is a
+  decision, not an oversight.
 - Images serve **AVIF** (WebP fallback); if you add a `quality` prop it must be
   listed in `next.config.ts` → `images.qualities`.
 
