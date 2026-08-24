@@ -102,8 +102,11 @@ export async function submitContact(
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
-      // TODO(Moheb): swap to a branded address once a domain is verified on Resend.
-      from: "Portfolio <onboarding@resend.dev>",
+      // Must be the verified sending domain, never the visitor's address: the
+      // DKIM signature is d=send.mohebsaeed.com, so a visitor address in From
+      // breaks alignment and the mail gets spam-foldered or refused. The
+      // visitor is reachable through replyTo below.
+      from: "Portfolio <portfolio@send.mohebsaeed.com>",
       to: [site.email],
       replyTo: email,
       // Collapse any newlines so the name can't spill onto its own header line.
