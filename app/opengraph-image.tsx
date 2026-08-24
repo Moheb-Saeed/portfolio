@@ -101,7 +101,7 @@ export default function OpengraphImage() {
             paddingTop: 32,
           }}
         >
-          {["Next.js", "TypeScript", "Node.js", "Tailwind CSS"].map((tech) => (
+          {["Next.js", "React.js", "Node.js", "TypeScript"].map((tech) => (
             <div
               key={tech}
               style={{
