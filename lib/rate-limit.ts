@@ -56,11 +56,12 @@ function memoryLimit(
 
 // undefined = not resolved yet, null = not configured.
 //
-// Nothing sets UPSTASH_REDIS_REST_URL / _TOKEN today, so every request takes
-// the in-memory path above and no IP-derived key ever leaves the server. The
-// privacy policy says exactly that and lists no Redis provider — turning
-// Upstash on makes it a third-party recipient, so add it back to the
-// processors clause in app/privacy/page.tsx in the same change.
+// UPSTASH_REDIS_REST_URL / _TOKEN are set, so requests take the Upstash path
+// and an IP-derived key does leave the server. That makes Upstash a third-party
+// recipient, which is why the processors clause in app/privacy/page.tsx names
+// it and the retention clause no longer claims the counter lives in process
+// memory. Unset the vars and the in-memory fallback returns — but then those
+// two clauses have to move back with it.
 let redis: Redis | null | undefined;
 
 function getRedis(): Redis | null {

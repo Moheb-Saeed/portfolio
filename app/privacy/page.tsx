@@ -21,7 +21,7 @@ import { site } from "@/lib/site";
 // The date this wording last changed. Deliberately a literal and not
 // `new Date()` — unlike the footer's year, an effective date that silently
 // moved would misstate when the terms actually changed. Update it by hand.
-const LAST_UPDATED = "22 August 2026";
+const LAST_UPDATED = "24 August 2026";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -212,6 +212,10 @@ const CLAUSES: Clause[] = [
               text: "delivers the contact form as an email to my inbox. It handles your name, email address and message in transit.",
             },
             {
+              term: "Upstash",
+              text: "provides the database holding the anti-spam counter, so it briefly holds a key derived from your IP address. It never receives your name, your email address or your message.",
+            },
+            {
               term: "Google",
               text: "provides the mailbox the message arrives in, so your message rests there as ordinary email.",
             },
@@ -260,7 +264,7 @@ const CLAUSES: Clause[] = [
           },
           {
             term: "The anti-spam counter",
-            text: "the ten-minute window it belongs to, and no longer. It is held in the server’s own memory rather than any database, so it is also lost whenever the server restarts. It is a count against a key, not a log of your visit, and nothing is written down when you are inside the limit.",
+            text: "the ten-minute window it belongs to, and no longer. The key expires by itself when the window closes. It is stored by Upstash as a count against a key derived from your IP address — a tally of how many messages have been sent from an address, never a record of what was in them or which pages you saw.",
           },
           {
             term: "Audience measurement",
@@ -284,8 +288,10 @@ const CLAUSES: Clause[] = [
         to be embedded in other sites, and declines the camera, microphone,
         geolocation and interest-tracking browser permissions outright. Contact
         form input is validated and length-limited before it is used, and escaped
-        before it is placed in an email. No visitor data is stored on this site at
-        all, which removes the largest category of risk rather than mitigating it.
+        before it is placed in an email. Beyond the ten-minute anti-spam
+        counter, no visitor data is stored at all — there is no database of
+        visitors, no accounts and no archive of messages, which removes the
+        largest category of risk rather than mitigating it.
         No system is perfectly secure, but there is very little here to lose.
       </P>
     ),

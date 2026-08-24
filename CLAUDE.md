@@ -67,10 +67,11 @@ overview; this file focuses on conventions and non-obvious gotchas.
   those and the page becomes a false statement, so update it in the same commit.
   Its `LAST_UPDATED` is a hand-edited literal on purpose: unlike the footer's
   computed year, an effective date that moved on its own would misstate when the
-  terms changed. The processors clause lists Vercel, Resend and Google only —
-  Upstash is deliberately absent because no `UPSTASH_*` env var is set and the
-  limiter runs in memory. Configure Upstash and it becomes a third-party
-  recipient that the clause has to name.
+  terms changed. The processors clause names Vercel, Resend, Upstash and Google.
+  Upstash is in it because the `UPSTASH_*` env vars are set, so the limiter's
+  IP-derived key leaves the server. Unset them and the limiter falls back to
+  memory — at which point Upstash has to come back out of the processors clause
+  and the retention clause goes back to describing process memory.
 - **Nav links are route-aware.** `NavBar` emits bare `#work` on the homepage, so
   `SmoothScroll`'s `a[href^="#"]` handler animates the travel, and `/#work`
   everywhere else, where a bare hash would resolve against the sub-page and go
