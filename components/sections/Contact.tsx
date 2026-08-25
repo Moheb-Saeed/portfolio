@@ -1,21 +1,50 @@
-import { FaWhatsapp } from "react-icons/fa6";
+import type { ComponentType, SVGProps } from "react";
+import { FaEnvelope, FaGithub, FaLinkedin, FaWhatsapp } from "react-icons/fa6";
 import { ContactForm } from "@/components/ui/ContactForm";
 import { Reveal } from "@/components/ui/Reveal";
 import { Eyebrow, Section } from "@/components/ui/Section";
+import { btnSecondary } from "@/components/ui/button";
 import { site } from "@/lib/site";
 
 type ContactLink = {
   label: string;
-  value: string;
   href: string;
-  icon?: boolean;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  /** Per glyph: these marks don't carry equal weight at equal box sizes. */
+  iconSize: string;
 };
 
+/**
+ * Icon + label, no value. The values these used to print — the address, the
+ * handles, the phone number — were the href written out a second time, so they
+ * cost four rows of weight for nothing a click doesn't give. (They were *not*
+ * load-bearing for anti-harvesting: `site.whatsapp` is a wa.me URL, so the
+ * digits are in the href either way.) The label stays because it is the part
+ * that was never a duplicate, and four unlabelled squares read as anonymous.
+ *
+ * Two things here are measured against the rendered glyphs, not guessed:
+ *
+ * · Size (`iconSize`, per link). The envelope is a filled, wide shape that
+ *   already carries as much weight at 16 as the three brand marks do at 20, so
+ *   it holds `size-4` while they take `size-5` — the next step on the 4px scale.
+ *
+ * · Lift (0.08em, shared below). `items-center` centres each icon's *box*, but
+ *   the eye aligns the *ink* to the label's cap height, which sits higher. One
+ *   shared value because it measured right for all four — within 0.2px of the
+ *   cap line — and in em so it tracks the label. Re-measure if either changes.
+ *
+ * LinkedIn is `FaLinkedin`, the enclosed badge, not `FaLinkedinIn`, the bare
+ * "in". The bare mark is letterforms sitting beside letterforms, so the eye
+ * lines its baseline up with the label's and reads the ~3.7px overhang as the
+ * icon being off the line — GitHub's mark overhangs more (4.3px) and looks fine,
+ * because an enclosed shape has no baseline to compare. The badge also puts all
+ * three brand marks in one family.
+ */
 const links: ContactLink[] = [
-  { label: "Email", value: site.email, href: `mailto:${site.email}` },
-  { label: "LinkedIn", value: "moheb-saeed", href: site.linkedin },
-  { label: "GitHub", value: "Moheb-Saeed", href: site.github },
-  { label: "WhatsApp", value: "+20 100 554 7821", href: site.whatsapp, icon: true },
+  { label: "Email", href: `mailto:${site.email}`, Icon: FaEnvelope, iconSize: "size-4" },
+  { label: "LinkedIn", href: site.linkedin, Icon: FaLinkedin, iconSize: "size-5" },
+  { label: "GitHub", href: site.github, Icon: FaGithub, iconSize: "size-5" },
+  { label: "WhatsApp", href: site.whatsapp, Icon: FaWhatsapp, iconSize: "size-5" },
 ];
 
 export function Contact() {
@@ -23,42 +52,43 @@ export function Contact() {
     <Section id="contact">
       <Reveal>
         <Eyebrow>Contact</Eyebrow>
-        <h2 className="mt-3 text-h2 text-balance">Let&apos;s work together</h2>
+        <h2 className="mt-3 text-h1 text-balance">Let&apos;s work together</h2>
         <p className="mt-4 max-w-xl text-body text-muted text-pretty">
           Have a project in mind, or a role you think I&apos;d fit? Send a
           message or reach me directly.
         </p>
       </Reveal>
 
-      <Reveal className="mt-12 grid gap-12 md:grid-cols-2 md:gap-16">
-        <ContactForm />
-
-        <ul className="space-y-4">
-          {links.map((link) => {
-            const external = !link.href.startsWith("mailto:");
+      {/* The row sits with the copy rather than in a second column: four links
+          can't hold a column beside a form five fields tall. They take
+          `btnSecondary` unchanged, so this reads as the same kind of row as the
+          hero's — a control is a control, and the shared class keeps the height,
+          radius and hover identical without a second definition of them. */}
+      <Reveal>
+        <ul className="mt-8 flex flex-wrap gap-3">
+          {links.map(({ label, href, Icon, iconSize }) => {
+            const external = !href.startsWith("mailto:");
             return (
-              <li key={link.label}>
+              <li key={label}>
                 <a
-                  href={link.href}
+                  href={href}
                   {...(external
                     ? { target: "_blank", rel: "noopener noreferrer" }
                     : {})}
-                  className="flex items-center justify-between gap-4 rounded-card border border-line bg-raised px-4 py-3 shadow-raised transition-colors duration-200 hover:border-accent"
+                  className={`${btnSecondary} gap-2`}
                 >
-                  <span className="flex min-w-0 items-center gap-3 text-small font-semibold text-ink">
-                    {link.icon && (
-                      <FaWhatsapp aria-hidden className="size-4 shrink-0 text-accent" />
-                    )}
-                    {link.label}
-                  </span>
-                  <span className="truncate font-mono text-small text-muted">
-                    {link.value}
-                  </span>
+                  {/* Decorative: the label beside it is the accessible name. */}
+                  <Icon aria-hidden className={`shrink-0 -translate-y-[0.08em] ${iconSize}`} />
+                  {label}
                 </a>
               </li>
             );
           })}
         </ul>
+      </Reveal>
+
+      <Reveal className="mt-12 max-w-xl">
+        <ContactForm />
       </Reveal>
     </Section>
   );
