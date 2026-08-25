@@ -28,6 +28,14 @@ export type ContactState = {
   status: "idle" | "success" | "error";
   message?: string;
   fieldErrors?: Partial<Record<"name" | "email" | "message", string>>;
+  /**
+   * The submission, echoed back. React 19 resets an uncontrolled form once its
+   * action settles — on failure too — restoring every field to its current
+   * `defaultValue`. The form feeds these back in as those defaults, so a
+   * rejected submission lands on what the visitor wrote instead of wiping it.
+   * Every error return has to carry them; one that forgets clears the form.
+   */
+  values?: { name: string; email: string; message: string };
 };
 
 export async function submitContact(
@@ -35,9 +43,25 @@ export async function submitContact(
   formData: FormData
 ): Promise<ContactState> {
   // Anti-spam 1: honeypot. Bots fill every field; humans never see this one.
-  if (formData.get("company")) {
+  //
+  // Deliberately not called "company". A hidden field named or labelled for an
+  // autofill category — company/organization is one — can be filled by the
+  // browser rather than by a bot, and because this branch reports success while
+  // sending nothing, that visitor is thanked for a message that never arrives.
+  // `autoComplete="off"` is advisory and Chrome ignores it for address-shaped
+  // fields, so the defence is the name, not the attribute. Keep it meaningless.
+  if (formData.get("ref-code")) {
     return { status: "success" }; // silently pretend it worked
   }
+
+  // Read once, for the echo on every error return below. Sliced to the schema's
+  // own ceilings: these go back out as DOM attributes, and an unbounded echo
+  // would hand anyone a way to inflate the response.
+  const values = {
+    name: String(formData.get("name") ?? "").slice(0, 100),
+    email: String(formData.get("email") ?? "").slice(0, 200),
+    message: String(formData.get("message") ?? "").slice(0, 5000),
+  };
 
   // Anti-spam 2: minimum fill time. The timestamp is stamped on mount using the
   // browser's clock, so it's only trustworthy when it's present and roughly
@@ -51,6 +75,7 @@ export async function submitContact(
     return {
       status: "error",
       message: "That was too quick — please try again.",
+      values,
     };
   }
 
@@ -65,6 +90,7 @@ export async function submitContact(
     return {
       status: "error",
       message: "Please fix the highlighted fields.",
+      values,
       fieldErrors: {
         name: flat.name?.[0],
         email: flat.email?.[0],
@@ -79,6 +105,7 @@ export async function submitContact(
     return {
       status: "error",
       message: "Email isn't configured right now. Please email me directly.",
+      values,
     };
   }
 
@@ -96,6 +123,7 @@ export async function submitContact(
     return {
       status: "error",
       message: `Too many messages. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+      values,
     };
   }
 
@@ -120,6 +148,7 @@ export async function submitContact(
       return {
         status: "error",
         message: "Something went wrong sending your message. Please try again.",
+        values,
       };
     }
   } catch (err) {
@@ -127,6 +156,7 @@ export async function submitContact(
     return {
       status: "error",
       message: "Something went wrong sending your message. Please try again.",
+      values,
     };
   }
 

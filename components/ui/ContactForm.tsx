@@ -43,13 +43,33 @@ export function ContactForm() {
 
   useEffect(stampStartedAt, []);
 
+  // React 19 resets an uncontrolled form once its action settles — on failure as
+  // well as success — and that reset blanks this hidden field along with the
+  // visible ones. No explicit reset() is needed here, but the stamp has to be
+  // re-armed, and on *every* settled state rather than only on success: leaving
+  // it to success alone meant every later attempt in the session carried an
+  // empty `startedAt`, which submitContact reads as "no stamp" and lets past the
+  // minimum-fill-time guard, so the guard quietly stopped running after the
+  // first submit. (Keying this on `state.status` had the same effect between two
+  // consecutive successes: same value, so the effect never re-ran.) Re-stamping
+  // can't weaken the guard — the clock restarts at now, so a bot still has to
+  // wait out MIN_FILL_MS.
   useEffect(() => {
-    if (state.status !== "success") return;
-    formRef.current?.reset();
-    // reset() blanks the hidden field, so re-stamp or the next send is
-    // rejected by the server's minimum-fill-time check.
+    if (state.status === "idle") return;
     stampStartedAt();
-  }, [state.status]);
+
+    // The reset also drops focus, and the error copy is announced politely from
+    // the live region below — which tells a screen-reader user that something
+    // needs fixing without telling them where. Land them on the first field.
+    const firstInvalid = (["name", "email", "message"] as const).find(
+      (field) => state.fieldErrors?.[field]
+    );
+    if (firstInvalid) {
+      formRef.current
+        ?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)
+        ?.focus();
+    }
+  }, [state]);
 
   const errors = state.fieldErrors;
 
@@ -57,10 +77,15 @@ export function ContactForm() {
     <form ref={formRef} action={formAction} className="space-y-4">
       <input ref={startedAtRef} type="hidden" name="startedAt" defaultValue="" />
 
-      {/* Honeypot — hidden from humans and assistive tech, irresistible to bots. */}
+      {/* Honeypot — hidden from humans and assistive tech, irresistible to bots.
+          The name and label are deliberately meaningless: this used to be
+          "Company", which browsers match to the organization autofill category
+          and can fill on the visitor's behalf. submitContact answers a filled
+          honeypot with a silent success, so an autofilled one thanks a real
+          visitor for a message it never sent. */}
       <div aria-hidden className="absolute left-[-9999px] h-px w-px overflow-hidden">
-        <label htmlFor="company">Company</label>
-        <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+        <label htmlFor="ref-code">Leave this field empty</label>
+        <input id="ref-code" name="ref-code" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       <div>
@@ -74,6 +99,8 @@ export function ContactForm() {
           required
           maxLength={100}
           autoComplete="name"
+          // The value React's post-action reset restores to — see ContactState.
+          defaultValue={state.values?.name ?? ""}
           aria-invalid={!!errors?.name}
           aria-describedby={errors?.name ? "name-error" : undefined}
           className={fieldClass}
@@ -93,6 +120,7 @@ export function ContactForm() {
           maxLength={200}
           autoComplete="email"
           spellCheck={false}
+          defaultValue={state.values?.email ?? ""}
           aria-invalid={!!errors?.email}
           aria-describedby={errors?.email ? "email-error" : undefined}
           className={fieldClass}
@@ -110,6 +138,7 @@ export function ContactForm() {
           required
           rows={5}
           maxLength={5000}
+          defaultValue={state.values?.message ?? ""}
           aria-invalid={!!errors?.message}
           aria-describedby={errors?.message ? "message-error" : undefined}
           className={`${fieldClass} resize-y`}
