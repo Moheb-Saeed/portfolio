@@ -14,6 +14,75 @@ test.describe("contact form", () => {
     ).toBeVisible();
   });
 
+  test("keeps what you typed, and points at the field, when rejected", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const name = page.getByRole("textbox", { name: "Name" });
+    const message = page.getByRole("textbox", { name: "Message" });
+    await name.fill("Jane Doe");
+    await page.getByRole("textbox", { name: "Email" }).fill("jane@example.com");
+    // Short on purpose — same reason as the test below: it keeps a real send
+    // unreachable. Blanking the stamp skips the fill-time guard, so the request
+    // reaches validation rather than stopping at "too quick".
+    await message.fill("Hi.");
+    await page.evaluate(() => {
+      const el = document.querySelector<HTMLInputElement>(
+        'input[name="startedAt"]'
+      );
+      if (el) el.value = "";
+    });
+    await page.getByRole("button", { name: /send message/i }).click();
+
+    await expect(page.locator("#contact form p[aria-live]")).toHaveText(
+      /highlighted fields/i
+    );
+    // React 19 resets an uncontrolled form once the action settles, error
+    // included, so without submitContact echoing the submission back into
+    // `defaultValue` these come back empty and the visitor loses their message.
+    await expect(name).toHaveValue("Jane Doe");
+    await expect(message).toHaveValue("Hi.");
+    await expect(message).toBeFocused();
+  });
+
+  test("re-arms the fill-time guard after a rejected submission", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const send = page.getByRole("button", { name: /send message/i });
+    const fill = async () => {
+      await page.getByRole("textbox", { name: "Name" }).fill("Jane Doe");
+      await page
+        .getByRole("textbox", { name: "Email" })
+        .fill("jane@example.com");
+      await page.getByRole("textbox", { name: "Message" }).fill("Hi.");
+    };
+
+    // First attempt runs with the stamp blanked, so it lands on validation and
+    // also warms the action. The reset that follows blanks the stamp again.
+    await fill();
+    await page.evaluate(() => {
+      const el = document.querySelector<HTMLInputElement>(
+        'input[name="startedAt"]'
+      );
+      if (el) el.value = "";
+    });
+    await send.click();
+    await expect(page.locator("#contact form p[aria-live]")).toHaveText(
+      /highlighted fields/i
+    );
+
+    // Nothing touches the stamp from here: the form has to have re-armed it
+    // itself, or submitContact sees no stamp and waves this straight through.
+    await fill();
+    await send.click();
+    await expect(page.locator("#contact form p[aria-live]")).toHaveText(
+      /too quick/i
+    );
+  });
+
   test("rejects a submission that arrives too fast (anti-spam)", async ({
     page,
   }) => {
