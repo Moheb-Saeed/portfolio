@@ -13,7 +13,7 @@ export function Work() {
     <Section id="work">
       <Reveal>
         <Eyebrow>Selected work</Eyebrow>
-        <h2 className="mt-3 text-h2 text-balance">Work</h2>
+        <h2 className="mt-3 text-h1 text-balance">Work</h2>
       </Reveal>
 
       {/* No `priority` on any project: the hero is min-h-svh, so not even the
@@ -29,10 +29,13 @@ export function Work() {
             className={i > 0 ? "mt-16 border-t border-line pt-16" : undefined}
           >
             <Reveal>
-              {/* Set as a label rather than a smaller heading: the projects
-                  under it carry the H3 size, so the group marker reads like a
-                  spec-sheet section header instead of competing with them. */}
-              <h3 className="font-mono text-eyebrow uppercase text-accent">
+              {/* Sized at the H2 step so the group reads as a real header, one
+                  rung under the section's H1 and one above the projects' H3.
+                  It keeps the mono/uppercase spec-sheet voice; the tracking is
+                  set by hand because the eyebrow's 0.14em is tuned for 12px and
+                  looks blown apart at 28, while the H2 step's own -0.01em is a
+                  lowercase value that cramps caps. */}
+              <h3 className="font-mono text-h2 uppercase tracking-[0.06em] text-accent">
                 {category}
               </h3>
             </Reveal>

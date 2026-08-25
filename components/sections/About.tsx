@@ -9,11 +9,15 @@ export function About() {
     <Section id="about">
       <Reveal>
         <Eyebrow>About</Eyebrow>
-        <h2 className="mt-3 text-h2 text-balance">A little about me</h2>
+        <h2 className="mt-3 text-h1 text-balance">A little about me</h2>
       </Reveal>
 
       {/* Drafted from Moheb's CV — edit freely. */}
-      <Reveal className="mt-8 max-w-2xl space-y-6 text-body text-muted text-pretty">
+      {/* Same `max-w-xl` as the hero's and contact's copy, so the three text
+          columns share a right edge and the whitespace beside them reads as one
+          deliberate column rather than a wandering rag. It also puts the measure
+          at ~75 characters; at 2xl this ran to 87, past the comfortable band. */}
+      <Reveal className="mt-8 max-w-xl space-y-6 text-body text-muted text-pretty">
         <p>
           I&apos;m a software engineer based in Cairo with a B.E. in Computer
           Engineering, specializing in full-stack web architecture with Next.js
