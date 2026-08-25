@@ -148,6 +148,26 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - Images serve **AVIF** (WebP fallback); if you add a `quality` prop it must be
   listed in `next.config.ts` → `images.qualities`.
 
+- **React 19 resets an uncontrolled form when its action settles — including on
+  failure.** Every field returns to its `defaultValue`, the hidden `startedAt`
+  with them, and nothing in the component asks for it. Two things lean on
+  knowing that. `submitContact` echoes the submission back as `state.values` and
+  each field takes its `defaultValue` from it, so the reset lands on what the
+  visitor typed; drop the echo from any one error return and that path silently
+  clears the form and leaves the field errors pointing at empty boxes. And
+  `ContactForm` re-stamps `startedAt` on *every* settled state — keyed on
+  `state`, not `state.status`, which doesn't change between two successes.
+  Stamping only on success left later submissions carrying an empty stamp, which
+  the action reads as "no stamp" and lets through, so the fill-time guard quietly
+  stopped running after the first attempt. Both are covered in
+  `e2e/contact.spec.ts`; both tests fail if the fix is removed.
+- **The honeypot's name must stay meaningless.** It was `company`, which
+  browsers match to the organization autofill category and can fill on the
+  visitor's behalf — and since a filled honeypot answers with a silent success,
+  that thanks a real person for a message that was never sent. `autoComplete="off"`
+  is advisory and Chrome ignores it for address-shaped fields, so the name is the
+  defence. Renaming it means changing `ContactForm` and the `formData.get` in
+  `submitContact` together.
 - **The anti-spam e2e test submits a message too short to validate, on purpose.**
   Its guard only fires while the server sees under `MIN_FILL_MS` (3s) between
   form-open and submit, and a loaded run overshoots that — `submitContact` then

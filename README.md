@@ -142,7 +142,13 @@ All of it lives in `app/globals.css`.
 - **Contact form** (`app/actions/contact.ts`): shared Zod validation
   (`lib/contact.ts`), a honeypot + minimum-fill-time, per-IP rate limiting
   (`lib/rate-limit.ts` — Upstash if configured, else in-memory), an
-  HTML-escaped email body, and delivery via Resend.
+  HTML-escaped email body, and delivery via Resend. Every error return echoes
+  the submission back as `values`: React 19 resets the form once the action
+  settles and the fields restore from `defaultValue`, so without the echo a
+  rejected submission wipes what the visitor wrote. A rejection also moves focus
+  to the first field at fault. Rate limiting counts *attempts*, not successful
+  sends — a failed send still spends one, deliberately, so a broken provider
+  can't be turned into unlimited retries.
 - **Privacy policy** (`app/privacy/page.tsx`) is the site's only sub-page. Its
   clauses are a `CLAUSES` array rather than hand-written markup, so the contents
   list and the sections render from one source and can't drift apart. What it
