@@ -156,7 +156,17 @@ overview; this file focuses on conventions and non-obvious gotchas.
   enquiry from Jane Doe" mail in Moheb's inbox. Validation sits between the
   guard and the send, so a sub-10-character message makes the send unreachable
   whatever the timing or the server. Give that test a "valid" message and the
-  bug is back. The test can still fail on a slow run; it just cannot mail anyone.
+  bug is back.
+- **That same test submits twice, and the first one is load-bearing.** The stamp
+  is written immediately before the click, so the server reads `elapsed` as the
+  click-to-server round trip itself — and dev compiles the server action on its
+  first invocation, measured at 2.7–3.6s against `MIN_FILL_MS`'s 3000. The guard
+  fired or didn't on which side of 3000 the run landed, which is why this used to
+  fail perhaps half of full-suite runs while passing alone. The throwaway submit
+  moves the real attempt onto the warm path (~0.2s). It runs with an empty stamp
+  so its own outcome can't be "too quick" — `submitContact` skips the guard when
+  the stamp is missing — which is what makes the second assertion proof that the
+  second response landed. Delete it and the flake returns.
 - **E2E reuses whatever answers on :3000.** That is what keeps it ~15s rather
   than a minute — a dedicated port would stop it reusing the dev server, and
   `next dev` refuses to run twice for one project on any port, so the suite

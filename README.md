@@ -143,8 +143,7 @@ All of it lives in `app/globals.css`.
   (`lib/contact.ts`), a honeypot + minimum-fill-time, per-IP rate limiting
   (`lib/rate-limit.ts` — Upstash if configured, else in-memory), an
   HTML-escaped email body, and delivery via Resend.
-- **Privacy policy** (`app/privacy/page.tsx`) is the site's only sub-page and
-  the first user of the `text-h1` step the scale reserved for exactly that. Its
+- **Privacy policy** (`app/privacy/page.tsx`) is the site's only sub-page. Its
   clauses are a `CLAUSES` array rather than hand-written markup, so the contents
   list and the sections render from one source and can't drift apart. What it
   claims is checkable against the code — the contact fields, the IP-keyed
@@ -179,14 +178,15 @@ All of it lives in `app/globals.css`.
 
 First e2e run needs the browser: `pnpm exec playwright install chromium`.
 
-**Known failure.** `contact.spec.ts › rejects a submission that arrives too
-fast` fails. The test stamps `startedAt` from the browser clock while the action
-subtracts using the server's; when the server reads even a millisecond behind,
-`elapsed` goes negative and the gate is skipped *by design* (see the clock-skew
-comment in `app/actions/contact.ts`). The submission then falls through to
-Resend and **sends a real email on every run**. Freeze the clock in the test, or
-have the action refuse to send outside production, before running the full
-suite. `pnpm exec playwright test e2e/home.spec.ts` avoids it.
+**`contact.spec.ts › rejects a submission that arrives too fast` is the fragile
+one, and both of its oddities are deliberate.** It submits a message under the
+schema's 10-character floor, so validation sits between the anti-spam guard and
+the Resend call and no run can mail anyone whatever the timing — an earlier
+version with a "valid" message put real enquiries in the inbox. And it submits
+twice: the stamp is written just before the click, so the server reads `elapsed`
+as the round trip itself, and dev's first-invocation compile of the server
+action measured 2.7–3.6s against `MIN_FILL_MS`'s 3000. The throwaway first
+submit moves the measured attempt onto the warm path. Keep both.
 
 ## Deploying to Vercel
 

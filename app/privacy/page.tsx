@@ -5,8 +5,8 @@ import { Footer } from "@/components/ui/Footer";
 import { site } from "@/lib/site";
 
 /**
- * The site's only sub-page, and the first user of the `text-h1` step the scale
- * reserved for exactly this (the homepage h1 is the display mark).
+ * The site's only sub-page. Its title takes the `text-h1` step, which the
+ * homepage's section headings share (the homepage h1 is the display mark).
  *
  * Clauses are data rather than hand-written markup so the contents list and the
  * sections can't drift apart: both render from CLAUSES, and every `id` here is
