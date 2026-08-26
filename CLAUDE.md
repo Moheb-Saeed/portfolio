@@ -77,6 +77,23 @@ overview; this file focuses on conventions and non-obvious gotchas.
   everywhere else, where a bare hash would resolve against the sub-page and go
   nowhere. Adding a route means keeping that split.
 
+- **The hide-on-scroll bar and `SmoothScroll` share one flag.** A scroll listener
+  can't tell the reader scrolling down from `SmoothScroll` animating a hash-link
+  trip down the page, and hiding the bar on the second yanks it out from under
+  the link that was just clicked. So `SmoothScroll` marks `<html>` with
+  `data-auto-scroll` for the length of its travel and `NavBar` declines to hide
+  while it's there. The mark is dropped by `cancel()` — which is also what runs
+  the moment the reader takes control back, so a real scroll mid-travel hides the
+  bar as usual — and, at the end of a completed trip, one frame *after* the last
+  hop: a frame's scroll event is dispatched at the top of the next frame, and a
+  stalled frame can make that final hop the whole journey. Clear it in the same
+  frame and a click on a nav link ends with the bar gone. Covered in
+  `e2e/home.spec.ts`.
+- **The bar's transition names `translate`, not `transform`.** Tailwind v4's
+  `-translate-y-full` sets the standalone `translate` property, so a
+  `transition-[transform,…]` compiles fine, animates nothing, and leaves the bar
+  snapping in and out.
+
 ## Gotchas
 
 - **Dev image cache (Next 16 + Turbopack) is at `.next/dev/cache/images`**, not

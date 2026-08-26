@@ -129,6 +129,13 @@ All of it lives in `app/globals.css`.
   read as a snap. The handler eases hash-link travel over 450–1100ms, keeps the
   URL hash, moves focus to the target for keyboard users, and aborts the moment
   the user scrolls.
+- **The app bar hides on the way down** (`components/ui/NavBar.tsx`) and returns
+  on the first upward move, or whenever the page comes back within the bar's own
+  height of the top. Movement under 6px doesn't flip it — and accumulates rather
+  than resets, so a slow drag still counts — which keeps momentum settling and
+  rubber-banding from twitching it. Focus landing inside a hidden bar reveals it:
+  translated away, it keeps its links in the tab order. `SmoothScroll`'s travel
+  is exempt, so clicking a nav link doesn't hide the nav.
 - **The hero never animates in.** It is the LCP element, so it paints straight
   from static HTML instead of starting at `opacity: 0` until hydration.
 - **Fonts are self-hosted** from `app/fonts` via `next/font/local`. Google's
