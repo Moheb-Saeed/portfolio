@@ -10,9 +10,19 @@ const SECTIONS = [
   { id: "contact", label: "Contact" },
 ] as const;
 
+/** The bar's own height (`h-16`). Above this there is nothing to reveal by
+ *  hiding, so the bar stays put. */
+const NAV_H = 64;
+
+/** Movement below this doesn't flip the bar: sub-pixel drift, momentum settling
+ *  and iOS rubber-banding all land under it. Deltas that fall short accumulate
+ *  rather than reset, so a slow, deliberate drag still trips it. */
+const FLIP_THRESHOLD = 6;
+
 export function NavBar() {
   const [active, setActive] = useState<string>("");
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   // The sections only exist on the homepage. Bare `#work` from a sub-page
   // would resolve against that page and go nowhere, so link back to `/#work`
   // there — and keep the bare hash at home, where SmoothScroll's
@@ -20,7 +30,30 @@ export function NavBar() {
   const onHome = usePathname() === "/";
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let lastY = window.scrollY;
+
+    const onScroll = () => {
+      const y = Math.max(window.scrollY, 0);
+      setScrolled(y > 8);
+
+      // Reading down hides the bar; reading back up brings it straight back.
+      if (y <= NAV_H) {
+        // Also covers a page restored mid-scroll — it never opens hidden.
+        setHidden(false);
+        lastY = y;
+        return;
+      }
+      const delta = y - lastY;
+      if (Math.abs(delta) < FLIP_THRESHOLD) return; // leave lastY to accumulate
+      lastY = y;
+      // A hash link hands the page to SmoothScroll, and its travel reads
+      // exactly like a reader scrolling down. Hiding on that would snatch the
+      // bar away from under the link just clicked, so sit still while it runs —
+      // SmoothScroll drops the mark the moment the reader takes over.
+      if (delta > 0 && document.documentElement.dataset.autoScroll) return;
+      setHidden(delta > 0);
+    };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -50,9 +83,17 @@ export function NavBar() {
 
   return (
     <header
+      // A hidden bar keeps its links in the tab order, so focus can land on one
+      // that is off-screen. Bring it back rather than let that happen.
+      onFocus={() => setHidden(false)}
       // Solid on scroll, not frosted — §12 rules out glassmorphism, so the bar
       // separates from the page with a hairline and a raised surface instead.
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+      // `translate`, not `transform`: the translate utilities set the standalone
+      // property, and a transition naming `transform` would leave the bar
+      // snapping in and out.
+      className={`fixed inset-x-0 top-0 z-50 transition-[translate,background-color,border-color] duration-300 ease-out motion-reduce:transition-none ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      } ${
         scrolled
           ? "border-b border-line bg-surface"
           : "border-b border-transparent"

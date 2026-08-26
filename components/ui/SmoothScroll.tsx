@@ -27,9 +27,19 @@ export function SmoothScroll() {
   useEffect(() => {
     let frame = 0;
 
+    // Marks the page as scrolling under its own power. `ui/NavBar.tsx` reads it
+    // to tell this travel apart from a reader scrolling down, which look
+    // identical from a scroll listener.
+    const mark = (running: boolean) => {
+      const root = document.documentElement;
+      if (running) root.dataset.autoScroll = "true";
+      else delete root.dataset.autoScroll;
+    };
+
     const cancel = () => {
       if (frame) cancelAnimationFrame(frame);
       frame = 0;
+      mark(false);
     };
 
     const scrollTo = (target: HTMLElement) => {
@@ -56,9 +66,19 @@ export function SmoothScroll() {
         // `instant` matters: a plain scrollTo would inherit the CSS
         // `scroll-behavior: smooth` and re-animate on every single frame.
         window.scrollTo({ top: from + distance * easeInOutCubic(t), behavior: "instant" });
-        frame = t < 1 ? requestAnimationFrame(step) : 0;
+        if (t < 1) {
+          frame = requestAnimationFrame(step);
+          return;
+        }
+        frame = 0;
+        // A frame's scroll event is dispatched at the top of the *next* frame,
+        // so drop the mark one frame late. Clearing it here would leave the
+        // last hop — which can be the whole trip if a slow frame stalled the
+        // travel — arriving as an unmarked scroll.
+        requestAnimationFrame(() => mark(false));
       };
       cancel();
+      mark(true);
       frame = requestAnimationFrame(step);
     };
 
