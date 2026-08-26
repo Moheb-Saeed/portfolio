@@ -21,8 +21,9 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - `app/fonts/` — self-hosted Space Grotesk / Archivo / JetBrains Mono, wired via
   `next/font/local` in `layout.tsx`.
 - `components/sections/` — page sections (Hero, Work, About, Contact).
-- `components/ui/` — reusable pieces: device frame/screen, NavBar, Footer,
-  forms, Reveal/ClusterReveal, `Section` (page shell + `Eyebrow`/`BrandRule`),
+- `components/ui/` — reusable pieces: device frame/screen, `ProjectCard`,
+  NavBar, Footer, forms, Reveal/ClusterReveal, `Section` (page shell +
+  `Eyebrow`/`BrandRule`), `Background` (the hero's lattice texture),
   `button.ts` (shared control classes), `Loader`, `SmoothScroll`, and the two
   marks — `MSLogo` (live text) and `MSMarkOutline` (generated outlines).
 - `data/projects.ts` — the single source of truth for projects.
@@ -114,11 +115,14 @@ overview; this file focuses on conventions and non-obvious gotchas.
   scrolls) contains the device layers that start off-screen at `translateX(±100vw)`.
   Uses `clip`, not `hidden`, so the sticky nav still works.
 - **Every project renders from screenshots; there are no live embeds.** Framing
-  the client sites cost ~10MB and ~4MB of third-party JS across 12 iframes, and
-  put the section at the mercy of sites we don't control. Capture with
-  `pnpm screens [slug...]` (`scripts/capture-screens.mjs`) — it renders each site
-  at the viewport its frame represents and clips to the well's exact aspect, so
-  `object-cover` crops nothing. Sizes come from `lib/device-frames.ts`
+  a client site cost ~1.4–5.4MB and ~0.7–1.2MB of third-party JS per project,
+  across its three frames, and put the section at the mercy of sites we don't
+  control. The section now weighs 194KB on desktop and 113KB on mobile with no
+  third-party requests, and grows by one project's screenshots rather than by
+  three more live documents. Capture with `pnpm screens [slug...]`
+  (`scripts/capture-screens.mjs`) — it renders each site at the viewport its
+  frame represents and clips to the well's exact aspect, so `object-cover`
+  crops nothing. Sizes come from `lib/device-frames.ts`
   (`wellAspect`), which `DeviceFrame`, the script and the tests all share — don't
   re-derive them anywhere else.
 - **Recheck `screenBg` after recapturing.** It fills the strip above the notch and

@@ -34,6 +34,8 @@ pnpm dev
 | `pnpm lint` | ESLint |
 | `pnpm test` / `pnpm test:watch` | Vitest unit tests (once / watch) |
 | `pnpm test:e2e` | Playwright e2e (auto-starts, or reuses, the dev server) |
+| `npx tsc --noEmit` | Typecheck |
+| `pnpm screens [slug...]` | Recapture project screenshots (all projects if no slug) |
 
 ## Environment
 
@@ -93,17 +95,20 @@ All of it lives in `app/globals.css`.
   `Projects` — driven by the `category` field and `CATEGORY_ORDER` in
   `data/projects.ts` and rendered as sections in `components/sections/Work.tsx`.
 - **Device showcase** (`components/ui/DeviceScreen.tsx`) fills each frame's
-  screen well with a screenshot via `next/image`. Only the first card's MacBook
-  is eager; the rest lazy-load, and the iPad — `display:none` below `md` — is
-  never fetched on phones. The component holds no state, so it stays server-only
-  and ships no JS; the frame's `screenBg` backs the well while a shot decodes.
-  Earlier versions embedded each site in a live iframe. That cost ~10MB and ~4MB
-  of third-party JS across 12 documents per page load, and broke silently
-  whenever a client site was redesigned, went down, or started refusing to be
-  framed. Screenshots are captured at the viewport each frame represents and
-  clipped to the well's aspect (`lib/device-frames.ts`), so they show the same
-  pixels the embeds did — the whole section is now 194KB on desktop, 113KB on
-  mobile, with no third-party requests. Regenerate with `pnpm screens`.
+  screen well with a screenshot via `next/image`. Nothing is eager: the hero is
+  `min-h-svh`, so not even the first screenshot is in the initial viewport, and
+  preloading one would only compete with the fonts and the hero's LCP paint.
+  Every shot lazy-loads, and the iPad — `display:none` below `md` — is never
+  fetched on phones (21 image requests on desktop, 14 on a phone). The component
+  holds no state, so it stays server-only and ships no JS; the frame's
+  `screenBg` backs the well while a shot decodes. Earlier versions embedded each
+  site in a live iframe, at ~1.4–5.4MB and ~0.7–1.2MB of third-party JS per
+  project across its three frames, and broke silently whenever a client site was
+  redesigned, went down, or started refusing to be framed. Screenshots are
+  captured at the viewport each frame represents and clipped to the well's
+  aspect (`lib/device-frames.ts`), so they show the same pixels the embeds did —
+  the whole section is 194KB on desktop and 113KB on mobile, with no third-party
+  requests. Regenerate with `pnpm screens`.
 - **Cluster slide-in.** On scroll each device cluster slides to its resting
   position — MacBook from the left screen edge, iPad + iPhone from the right —
   via CSS keyframes toggled by one `IntersectionObserver`
@@ -113,8 +118,11 @@ All of it lives in `app/globals.css`.
   off-screen layers never add a horizontal scrollbar.
 - **Motion is CSS.** The `.reveal` fade, the `.device-*` slide and the opening
   sequence are the enter animations; the first two are toggled by a single
-  `IntersectionObserver` each. No `motion` library — only `transform`/`opacity`
-  ever animate.
+  `IntersectionObserver` each. No `motion` library, and every scroll-driven
+  reveal animates `transform`/`opacity` only, so the work stays on the
+  compositor. Two things sit outside that set, both deliberate: the app bar
+  transitions its background and border colours as it crosses the scroll
+  threshold, and the opening sequence ends on `visibility` (below).
 - **Opening sequence** (`components/ui/Loader.tsx`): the brackets close in
   around the initials, the signature gradient draws underneath, then the overlay
   lifts. ~1.35s, CSS-only and server-rendered, so it paints with the first frame
@@ -164,9 +172,15 @@ All of it lives in `app/globals.css`.
   editing a claim. It is linked from the footer and from the contact form, since
   the notice has to appear where the data is actually handed over.
 - **Security headers** are set for every response in `next.config.ts`:
-  `Content-Security-Policy: frame-ancestors 'none'`, `X-Frame-Options: DENY`,
-  `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`,
-  `Referrer-Policy`, and a locked-down `Permissions-Policy`.
+  `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`,
+  `Strict-Transport-Security`, `Referrer-Policy`, a locked-down
+  `Permissions-Policy`, and a deliberately partial CSP — `frame-ancestors
+  'none'; base-uri 'none'; form-action 'self'; object-src 'none'`. There is no
+  `script-src`, because Next inlines its bootstrap and flight data and a real
+  one would need a per-request nonce threaded through middleware; the absence is
+  a decision, not an oversight. The CV additionally carries `X-Robots-Tag:
+  noindex` — a header rather than a `robots.txt` `Disallow`, which would stop
+  the file being crawled and so stop the noindex ever being read.
 - **SEO.** Metadata, canonical, OpenGraph/Twitter, and a `Person` JSON-LD live
   in `app/layout.tsx`; plus `app/sitemap.ts`, `app/robots.ts`, and a generated
   `app/opengraph-image.tsx`. The OG image is a deep-field cover with the
@@ -183,11 +197,19 @@ All of it lives in `app/globals.css`.
 
 - **Unit — Vitest (node env).** Pure logic, as `*.test.ts` beside the code:
   `lib/rate-limit.test.ts`, `lib/contact.test.ts`, `data/projects.test.ts`.
-- **E2E — Playwright (chromium).** Smoke tests in `e2e/`: title/H1, the work /
-  about / contact sections, the three work categories, hash navigation, no
-  horizontal overflow, the security headers, and the contact form's fields +
-  anti-spam rejection. It reuses a dev server on `:3000` if one is up, otherwise
-  starts one.
+- **E2E — Playwright (chromium).** Three specs in `e2e/`:
+  - `home.spec.ts` — title/H1, the work / about / contact sections, the three
+    work categories, hash navigation, the app bar hiding on the way down and
+    returning on the way up, the app bar staying put while a hash link scrolls
+    the page, no horizontal overflow, and the security headers.
+  - `privacy.spec.ts` — title/H1, every contents entry pointing at a real
+    clause, reachability from the home page footer, and the nav links leading
+    back to the home page's sections.
+  - `contact.spec.ts` — the form's fields, keeping what you typed when a
+    submission is rejected, re-arming the fill-time guard after a rejection,
+    and the anti-spam rejection itself.
+
+  It reuses a dev server on `:3000` if one is up, otherwise starts one.
 
 First e2e run needs the browser: `pnpm exec playwright install chromium`.
 
@@ -208,21 +230,21 @@ submit moves the measured attempt onto the warm path. Keep both.
    - `RESEND_API_KEY` — required, or the contact form returns a friendly error.
    - `NEXT_PUBLIC_SITE_URL` — your production origin, no trailing slash.
    - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — optional.
-3. The form sends from `onboarding@resend.dev`, which only delivers to the email
-   your Resend account is registered under. To send from your own domain, verify
-   it on Resend and update `from:` in `app/actions/contact.ts`.
+3. The form sends from `Portfolio <portfolio@send.mohebsaeed.com>`, set as
+   `from:` in `app/actions/contact.ts`. That sending domain is verified on
+   Resend. A fork deploying under a different domain has to verify its own and
+   update `from:`, or fall back to `onboarding@resend.dev`, which only delivers
+   to the address its Resend account is registered under.
 
 ## Remaining copy / config
 
 Marked `TODO(Moheb)` in source:
 
-- The Resend `from:` branded address once a domain is verified
-  (`app/actions/contact.ts`).
 - The `draft: true` flag on Cairaw, to drop once `cairawfilms.com` is live
   (`data/projects.ts`).
 
-`lib/site.ts` now defaults to `https://mohebsaeed.com`; set
-`NEXT_PUBLIC_SITE_URL` only to override it for previews.
+`lib/site.ts` defaults to `https://mohebsaeed.com`; set `NEXT_PUBLIC_SITE_URL`
+only to override it for previews.
 
 ## Assets
 
