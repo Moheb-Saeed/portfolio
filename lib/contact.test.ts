@@ -55,3 +55,40 @@ describe("escapeHtml", () => {
     expect(escapeHtml("Just a normal message.")).toBe("Just a normal message.");
   });
 });
+
+describe("contactSchema · web address in the name", () => {
+  // The "Dear Webmaster" spam blasts substitute the crawled site's URL into the
+  // name slot of their template. Real names never carry one.
+  it.each([
+    "To the http://mohebsaeed.com/fekal0911 Administrator",
+    "Visit www.example.com",
+    "SEO Team example.com",
+    "check example.CO.uk",
+    "mail me at https://x.io",
+  ])("rejects %j", (name) => {
+    const r = contactSchema.safeParse({ ...valid, name });
+    expect(r.success).toBe(false);
+  });
+
+  // Names that look domain-ish are the reason the TLD arm is an explicit list
+  // anchored on a word boundary, not "dot plus letters".
+  it.each([
+    "St.Johns",
+    "Dr.Comstock",
+    "J. R. R. Tolkien",
+    "Jean-Luc O'Brien",
+    "Ana Maria São Paulo",
+    "李 明",
+  ])("accepts %j", (name) => {
+    const r = contactSchema.safeParse({ ...valid, name });
+    expect(r.success).toBe(true);
+  });
+
+  it("leaves links in the message alone", () => {
+    const r = contactSchema.safeParse({
+      ...valid,
+      message: "The role is at https://acme.com/jobs/42 — are you available?",
+    });
+    expect(r.success).toBe(true);
+  });
+});
