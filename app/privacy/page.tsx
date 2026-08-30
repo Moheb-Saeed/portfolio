@@ -514,7 +514,15 @@ export default function PrivacyPolicy() {
                 <p className="font-mono text-eyebrow uppercase text-muted tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </p>
-                <h2 id={`${clause.id}-title`} className="mt-2 text-h2 text-balance">
+                {/* 800, not the h2 step's 700: Archivo Bold was the one face
+                    nothing else on the site draws, so it was preloaded on every
+                    route and painted on none of the home page (36.8KB). Dropped
+                    from the layout's `src`, and these headings take the 800 that
+                    every h1 already loads — a real face, so no synthetic bold. */}
+                <h2
+                  id={`${clause.id}-title`}
+                  className="mt-2 text-h2 font-extrabold text-balance"
+                >
                   {clause.title}
                 </h2>
                 <div className="mt-5 flex flex-col gap-4">{clause.body}</div>

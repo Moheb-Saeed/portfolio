@@ -37,7 +37,6 @@ const archivo = localFont({
   src: [
     { path: "./fonts/Archivo-Regular.woff2", weight: "400", style: "normal" },
     { path: "./fonts/Archivo-SemiBold.woff2", weight: "600", style: "normal" },
-    { path: "./fonts/Archivo-Bold.woff2", weight: "700", style: "normal" },
     { path: "./fonts/Archivo-ExtraBold.woff2", weight: "800", style: "normal" },
   ],
 });
