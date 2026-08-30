@@ -1,9 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { Eyebrow, Section } from "@/components/ui/Section";
 
-/** 01 · Brand story — the four attributes the identity is built around. */
-const ATTRIBUTES = ["Precise", "Fast", "Bilingual", "Unfussy"];
-
 export function About() {
   return (
     <Section id="about">
@@ -19,11 +16,11 @@ export function About() {
           at ~75 characters; at 2xl this ran to 87, past the comfortable band. */}
       <Reveal className="mt-8 max-w-xl space-y-6 text-body text-muted text-pretty">
         <p>
-          I&apos;m a software engineer based in Cairo with a B.E. in Computer
-          Engineering, specializing in full-stack web architecture with Next.js
-          and Node.js. I care about interfaces that are fast, accessible, and
-          precise — the kind where the performance budget is part of the design,
-          not an afterthought.
+          I&apos;m a software engineer based in Cairo, working in Arabic and
+          English, with a B.E. in Computer Engineering and a specialization in
+          full-stack web architecture with Next.js and Node.js. I care about
+          interfaces that are fast, accessible, and precise — the kind where the
+          performance budget is part of the design, not an afterthought.
         </p>
         <p>
           I took the Intensive Code Camp at ITI — six months on the MEARN stack
@@ -42,18 +39,12 @@ export function About() {
         </p>
       </Reveal>
 
-      <Reveal>
-        <ul className="mt-8 flex flex-wrap gap-3">
-          {ATTRIBUTES.map((attribute) => (
-            <li
-              key={attribute}
-              className="rounded-full border border-accent/40 bg-accent-quiet px-3 py-2 font-mono text-eyebrow uppercase text-accent"
-            >
-              {attribute}
-            </li>
-          ))}
-        </ul>
-      </Reveal>
+      {/* The manual's §01 attributes (Precise / Fast / Bilingual / Unfussy) used
+          to close this section as four capsules. They are an internal north star
+          rather than page copy: Work sits above this section, so the projects
+          have already demonstrated them, and "fast" and "precise" repeated the
+          first paragraph word for word. "Bilingual" was the one fact among the
+          four and moved into the opening sentence. */}
     </Section>
   );
 }
