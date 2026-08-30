@@ -53,6 +53,13 @@ overview; this file focuses on conventions and non-obvious gotchas.
 - **Sizes come from the scale.** `text-display/h1/h2/h3/body/small/eyebrow` and
   `rounded-input/card/panel` carry the manual's values; spacing is the 4px scale
   with nothing in between. Reach for a token before a raw utility.
+- **No Archivo 700 face is bundled, though the h2 step asks for 700.** It was
+  the one weight nothing on the home page drew, so `next/font` preloaded 36.8KB
+  on every route and painted it on none — Chrome reports it as a preloaded-but-
+  unused resource. The only Archivo h2 (the privacy clauses) takes
+  `font-extrabold` instead. Add a new Archivo `text-h2` without that override
+  and it renders synthetic bold. `preload` is per-`localFont()` call, not per
+  `src`, so there is no way to keep the face and skip preloading just it.
 - **No animation library.** Enter animations are CSS (`.reveal`, `.device-*`,
   `.loader*`) toggled by `IntersectionObserver` or plain delays. Animate only
   `transform`/`opacity`.
@@ -189,6 +196,17 @@ overview; this file focuses on conventions and non-obvious gotchas.
   is advisory and Chrome ignores it for address-shaped fields, so the name is the
   defence. Renaming it means changing `ContactForm` and the `formData.get` in
   `submitContact` together.
+- **A web address in the `name` field is rejected; one in the message is not.**
+  The "Dear Webmaster" blasts run a template that drops the crawled site's own
+  URL into every slot, so they land as `Portfolio enquiry from To the
+  http://mohebsaeed.com/… Administrator` — a shape no real name has. That
+  asymmetry is the whole rule: names never carry a URL, while a genuine enquiry
+  routinely links a job post or a repo, so widening the check to the message
+  starts turning real people away. The TLD arm in `WEB_ADDRESS` is an explicit
+  list ending on a word boundary rather than "dot plus letters", which flags
+  actual names ("St.Johns", "Dr.Comstock"); `lib/contact.test.ts` pins both
+  sides. It is a content rule, not a captcha — a bot that sends a plausible name
+  still gets through, and the answer to that is Turnstile, not a longer regex.
 - **The anti-spam e2e test submits a message too short to validate, on purpose.**
   Its guard only fires while the server sees under `MIN_FILL_MS` (3s) between
   form-open and submit, and a loaded run overshoots that — `submitContact` then

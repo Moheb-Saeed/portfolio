@@ -148,14 +148,19 @@ All of it lives in `app/globals.css`.
   from static HTML instead of starting at `opacity: 0` until hydration.
 - **Fonts are self-hosted** from `app/fonts` via `next/font/local`. Google's
   static cuts of these families 404'd intermittently mid-build, and self-hosting
-  also drops a third-party origin from the critical path. Only the weights the
-  type scale needs are declared; the directory holds more faces than that, and
-  unreferenced ones are neither bundled nor served.
+  also drops a third-party origin from the critical path. Only declared weights
+  are bundled; the directory holds more faces than that, and unreferenced ones
+  are neither bundled nor served. Archivo 700 is the one weight the type scale
+  asks for that the layout deliberately does not declare — nothing on the home
+  page drew it, so it was preloaded on every route and painted on none (36.8KB).
+  The site's only Archivo h2, the privacy clauses, takes `font-extrabold`
+  instead: a real face, so no synthetic bold.
 - **Images.** `next/image` serves AVIF (WebP fallback) for both the device
   frames and the screenshots; screenshots render at `quality={65}` (they're
   small inside the frames). Configured in `next.config.ts`.
 - **Contact form** (`app/actions/contact.ts`): shared Zod validation
-  (`lib/contact.ts`), a honeypot + minimum-fill-time, per-IP rate limiting
+  (`lib/contact.ts`), three anti-spam rules — a honeypot, a minimum fill time,
+  and a rejection of any web address in the `name` field — per-IP rate limiting
   (`lib/rate-limit.ts` — Upstash if configured, else in-memory), an
   HTML-escaped email body, and delivery via Resend. Every error return echoes
   the submission back as `values`: React 19 resets the form once the action
